@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "function-paren-newline": "off",
+    "no-underscore-dangle": "off"
+  },
+  "globals": {
+    "describe": true,
+    "beforeEach": true,
+    "before": true,
+    "afterEach": true,
+    "after": true,
+    "it": true
+  },
+  "env": {
+    "node": true,
+    "es6": true
+  },
+
+  "extends": [
+    "airbnb-base",
+    "prettier"
+  ]
+}
