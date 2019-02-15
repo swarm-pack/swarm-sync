@@ -1,7 +1,11 @@
 {
   "rules": {
     "function-paren-newline": "off",
-    "no-underscore-dangle": "off"
+    "no-underscore-dangle": "off",
+    "import/extensions": ["error", "always", {
+      js: "never",
+      mjs: "never",
+    }]
   },
   "globals": {
     "describe": true,
@@ -17,7 +21,17 @@
   },
 
   "extends": [
-    "airbnb-base",
-    "prettier"
-  ]
+    "airbnb-base"
+  ],
+
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".mjs"
+        ]
+      }
+    }
+  }
 }
