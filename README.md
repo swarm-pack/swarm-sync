@@ -29,15 +29,19 @@ Flux-like GitOps for Docker Swarm
 </pre>
 
 
-### Components
+### Components of gitops
 
 There are 3 main components needed to achieve our GitOps pipeline:
 
-1. **Configuration Repository** - a Git repository containing all the configuration for your Docker Swarm stacks. It uses the [swarm-pack](https://github.com/vudknguyen/swarm-pack) package structure.
+1. **Configuration Repository** - a Git repository containing all the configuration for your Docker Swarm stacks. Example repository: [kevb/swarm-pack-example](https://github.com/kevb/swarm-sync-example)
 
 2. **Container Registry** - A Docker registry to push our application images to (hopefully from a CI somewhere else)
 
 3. **SwarmSync** - SwarmSync will be running inside your Swarm as a service and will be configured to point to the other 2 components.
+
+### Swarm-Pack
+
+Swarm-Sync relies on [vudknguyen/swarm-pack](https://github.com/vudknguyen/swarm-pack) to compile and deploy services from templates.
 
 ### How it works
 
@@ -46,6 +50,8 @@ There are 3 main components needed to achieve our GitOps pipeline:
 - Apply the configuration to the Swarm using swarm-pack
 - *Annotate services with labels, store history etc??*
 - Watch registry for changes to images & update service(s) when new digest available
+
+
 
 ## Installing
 
