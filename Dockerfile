@@ -26,9 +26,6 @@ COPY . .
 
 RUN yarn install
 
-# TODO - install swarm-pack binary from release?
-RUN cd node_modules/swarm-pack && npm link && cd /www
-
 RUN ["chmod", "+x", "./start.sh"]
 RUN ["chmod", "+x", "./env_secrets_expand.sh"]
 

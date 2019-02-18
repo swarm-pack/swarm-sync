@@ -1,10 +1,34 @@
 import simpleGit from 'simple-git/promise';
 import tmp from 'tmp';
 import sh from 'shelljs';
+import yaml from 'js-yaml';
+import fs from 'fs-extra';
+import { resolve, basename } from 'path';
 import config from '../config';
-import { getLastDeployedCommit } from './state'
+import { getDeployedStackPackCommit, getDeployedStackCommit } from './state'
 
 const GIT_SSH_COMMAND = "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no";
+
+
+/*
+
+Something like this:
+
+ - Pull repo
+ - Intersection of config.stacks & repo/stacks/{stack}
+    - Read all stack ymls
+    - Mark any changed stack dirs (git log)
+ - Read all packs
+    - Mark any changed packs (git log)
+ - For any changed stacks, deploy all packs (for now, later we can improve this)
+ - For any unchanged stacks, deploy any changed packs (if any)
+
+Reference:
+
+Get last commit for particular file or dir:
+git log --pretty=tformat:"%H" -n1 README.md
+
+*/
 
 class ConfigRepository {
   constructor() {
@@ -40,16 +64,65 @@ class ConfigRepository {
     })
   }
 
-  async getCommitHash() {
-    return this.repo.revparse(['HEAD']).then(rev => rev.trim())
+  getFullPathToPack(pack) {
+    return resolve(this.path, 'packs', pack);
   }
 
-  // Git pull, then compare HEAD commit with currently deployed state
+  getStackPackValues(stack, pack) {
+    return this.readFileSync
+  }
+
+  async getStackLastCommit(stack) {
+    return this.repo.log({ file: `stacks/${stack}.yml` }).then(log => log.latest.hash)
+  }
+
+  async getPackLastCommit(pack) {
+    return this.repo.log({ file: `packs/${pack}` }).then(log => log.latest.hash)
+  }
+
   async checkForUpdates() {
     return this.repo.pull()
       .then(() => this.gitCryptUnlock())
-      .then(() => this.getCommitHash())
-      .then((commit) => ({ changed: getLastDeployedCommit() !== commit, commit }))
+      // Get list of stacks & packs
+      .then(() => fs.readdir(resolve(this.path, 'stacks')).then(stackFiles => stackFiles.map(sf => basename(sf, '.yml'))))
+      .then((stacks) => fs.readdir(resolve(this.path, 'packs')).then((packs) => ({stacks, packs})))
+      .then(async({stacks, packs}) => {
+
+        // Stacks in target are defined in config.stacks, and have a corresponding stacks/[stack].yml in the repo
+        const targetStacks = stacks.filter(s => s.includes(config.stacks));
+        console.log(`Target stacks found: ${targetStacks.join(',')}`);
+
+        // Changes [{stack: 'foo', packs: 'bar'}] will contain a list of stacks (and it's packs)
+        // ..which need to be redeployed
+        const changes = [];
+
+        for (const stack of targetStacks) {
+          const stackDefinition = yaml.safeLoad(fs.readFileSync(resolve(this.path, 'stacks', `${stack}.yml`), 'utf8'));
+
+          if (getDeployedStackCommit(stack) !== await this.getStackLastCommit(stack)) {
+            changes.push({
+              stack,
+              packs: stackDefinition.packs
+            })
+          }else {
+            // Individual pack changes for stack
+            const changedStackPacks = [];
+            for (const pack of stackDefinition.packs) {
+              if (getDeployedStackPackCommit(stack, pack.pack) !== await this.getPackLastCommit(pack.pack)) {
+                if (changedStackPacks.length > 0) {
+                  changes.push({
+                    stack,
+                    packs: changedStackPacks
+                  })
+                }
+              }
+            }
+
+          }
+        }
+
+        return changes;
+      })
   }
 }
 

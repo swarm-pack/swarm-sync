@@ -1,5 +1,6 @@
 swarm-sync:
-  stack: experimental
+  stacks:
+    - nonprod
   git:
     url: https://github.com/kevb/swarm-sync-example
     branch: master

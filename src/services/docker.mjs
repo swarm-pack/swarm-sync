@@ -89,7 +89,7 @@ async function checkServices(services) {
   })
 }
 
-function checkAndUpdateImages() {
+async function checkAndUpdateImages() {
   return docker
     .listServices()
     .then((result) => {

@@ -1,25 +1,46 @@
 import fs from 'fs-extra';
 import path from 'path';
+import yaml from 'js-yaml';
 
 // TODO - probably will move away from file on volume approach eventually
 
 const stateStoragePath = process.env.STATE_STORAGE_FILE || false;
-let lastDeployedCommit = '';
+
+let state = {};
 
 if (stateStoragePath) {
   fs.ensureFileSync(stateStoragePath);
-  lastDeployedCommit = fs.readFileSync(path.resolve(stateStoragePath)).toString();
+  state = Object.assign(state, yaml.safeLoad(fs.readFileSync(path.resolve(stateStoragePath)).toString()));
 }
 
-function getLastDeployedCommit() {
-  return lastDeployedCommit;
+function getDeployedStackPackCommit(stack, pack) {
+  return (((state[stack] || {}).packs || {})[pack] || {}).commit || '';
 }
 
-function setLastDeployedCommit(commit) {
-  lastDeployedCommit = commit;
+function getDeployedStackCommit(stack) {
+  return (state[stack] || {}).commit || '';
+}
+
+function setDeployedStackCommit(stack, commit) {
+  state[stack] = state[stack] || { commit: '', packs: {} }
+  state[stack].commit = commit;
+  _saveState();
+}
+
+function setDeployedStackPackCommit(stack, pack, commit) {
+  state[stack] = state[stack] || { commit: '', packs: {} }
+  state[stack].packs[pack] = { commit };
+  _saveState();
+}
+
+function _saveState() {
   if (stateStoragePath) {
-    fs.writeFileSync(path.resolve(stateStoragePath), commit);
+    fs.writeFileSync(path.resolve(stateStoragePath), yaml.safeDump(state));
   }
 }
 
-export { getLastDeployedCommit, setLastDeployedCommit }
+export { 
+  getDeployedStackPackCommit,
+  getDeployedStackCommit,
+  setDeployedStackCommit,
+  setDeployedStackPackCommit }
