@@ -5,7 +5,10 @@
     "import/extensions": ["error", "always", {
       js: "never",
       mjs: "never",
-    }]
+    }],
+    "no-restricted-syntax": [0, "ForInStatement", "ForOfStatement"],
+    "no-await-in-loop": [0, "ForInStatement", "ForOfStatement"],
+    "max-len": [1, 120, 2]
   },
   "globals": {
     "describe": true,

@@ -27,17 +27,18 @@ async function startCheckAndDeployRepo() {
     for (const change of changes) {
       for (const pack of change.packs) {
         console.log(`Running equivalent to: swarm-pack deploy ${repo.getFullPathToPack(pack.pack)} ${change.stack}`);
-        await swarmpack.compileAndDeploy({ stack: change.stack, packDir: repo.getFullPathToPack(pack.pack), values: pack.values })
-        setDeployedStackPackCommit(change.stack, pack.pack, await repo.getPackLastCommit(pack.pack))
+        await swarmpack.compileAndDeploy({
+          stack: change.stack, packDir: repo.getFullPathToPack(pack.pack), values: pack.values,
+        });
+        setDeployedStackPackCommit(change.stack, pack.pack, await repo.getPackLastCommit(pack.pack));
       }
-      setDeployedStackCommit(change.stack, await repo.getStackLastCommit(change.stack))
+      setDeployedStackCommit(change.stack, await repo.getStackLastCommit(change.stack));
     }
-  }else {
+  } else {
     console.log('No changes in config repository to deploy');
   }
 
   setTimeout(startCheckAndDeployRepo, config.git.updateInterval);
-
 }
 
 async function startCheckAndUpdateImages() {
@@ -54,5 +55,5 @@ async function startCheckAndUpdateImages() {
 repo.init()
   .then(() => {
     startCheckAndDeployRepo();
-    //startCheckAndUpdateImages();
+    startCheckAndUpdateImages();
   });
