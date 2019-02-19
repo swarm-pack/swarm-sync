@@ -51,7 +51,15 @@ Swarm-Sync relies on [vudknguyen/swarm-pack](https://github.com/vudknguyen/swarm
 - *Annotate services with labels, store history etc??*
 - Watch registry for changes to images & update service(s) when new digest available
 
+### Try it out
 
+**Prerequisites::** Docker running on local machine in Swarm mode
+
+1. Run `yarn start:dev` - it will by default use the repo at https://github.com/kevb/swarm-sync-example
+2. Wait a few moments, you will have an nginx service started
+3. Wait a few more moments and it will update to the latest image matching pattern "1.*.*"
+4. Try manually changing the service image: `docker service update nonprod_swarm-sync --image=nginx:1.14.2`
+5. Wait a few moments, it will automatically update it back to the latest image
 
 ## Installing
 

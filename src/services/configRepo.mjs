@@ -9,27 +9,6 @@ import { getDeployedStackPackCommit, getDeployedStackCommit } from './state'
 
 const GIT_SSH_COMMAND = "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no";
 
-
-/*
-
-Something like this:
-
- - Pull repo
- - Intersection of config.stacks & repo/stacks/{stack}
-    - Read all stack ymls
-    - Mark any changed stack dirs (git log)
- - Read all packs
-    - Mark any changed packs (git log)
- - For any changed stacks, deploy all packs (for now, later we can improve this)
- - For any unchanged stacks, deploy any changed packs (if any)
-
-Reference:
-
-Get last commit for particular file or dir:
-git log --pretty=tformat:"%H" -n1 README.md
-
-*/
-
 class ConfigRepository {
   constructor() {
     this.tmp = tmp.dirSync();
@@ -92,8 +71,7 @@ class ConfigRepository {
         const targetStacks = stacks.filter(s => s.includes(config.stacks));
         console.log(`Target stacks found: ${targetStacks.join(',')}`);
 
-        // Changes [{stack: 'foo', packs: 'bar'}] will contain a list of stacks (and it's packs)
-        // ..which need to be redeployed
+        // Changes [{stack: 'foo', packs: 'bar'}] is a list of stacks (and it's packs) that changed
         const changes = [];
 
         for (const stack of targetStacks) {
@@ -109,15 +87,17 @@ class ConfigRepository {
             const changedStackPacks = [];
             for (const pack of stackDefinition.packs) {
               if (getDeployedStackPackCommit(stack, pack.pack) !== await this.getPackLastCommit(pack.pack)) {
-                if (changedStackPacks.length > 0) {
-                  changes.push({
-                    stack,
-                    packs: changedStackPacks
-                  })
-                }
+                changedStackPacks.push(pack)
               }
             }
 
+            //If any changes in any individual pack, add as changes
+            if (changedStackPacks.length > 0) {
+              changes.push({
+                stack,
+                packs: changedStackPacks
+              })
+            }
           }
         }
 

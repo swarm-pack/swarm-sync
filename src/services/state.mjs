@@ -35,6 +35,7 @@ function setDeployedStackPackCommit(stack, pack, commit) {
 
 function _saveState() {
   if (stateStoragePath) {
+    fs.ensureFileSync(stateStoragePath);
     fs.writeFileSync(path.resolve(stateStoragePath), yaml.safeDump(state));
   }
 }

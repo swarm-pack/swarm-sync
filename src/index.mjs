@@ -37,23 +37,26 @@ async function startCheckAndDeployRepo() {
   } else {
     console.log('No changes in config repository to deploy');
   }
-
-  setTimeout(startCheckAndDeployRepo, config.git.updateInterval);
 }
 
 async function startCheckAndUpdateImages() {
-  docker.checkAndUpdateImages().then((changes) => {
-    if (changes.length > 0) {
-      console.log(`${changes.length} service image${changes.length > 1 ? 's' : ''} updated:`);
-    } else {
-      console.log('No image updates found');
-    }
-    setTimeout(startCheckAndUpdateImages, config.docker.updateInterval);
-  });
+  const changes = await docker.checkAndUpdateImages();
+  if (changes.length > 0) {
+    console.log(`${changes.length} service image${changes.length > 1 ? 's' : ''} updated:`);
+  } else {
+    console.log('No image updates found');
+  }
 }
 
-repo.init()
-  .then(() => {
-    startCheckAndDeployRepo();
-    startCheckAndUpdateImages();
-  });
+async function startUpdates() {
+  try {
+    await startCheckAndDeployRepo();
+    await startCheckAndUpdateImages();
+    setTimeout(startUpdates, config.updateInterval);
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+}
+
+repo.init().then(() => startUpdates());

@@ -1,13 +1,12 @@
 swarm-sync:
   stacks:
     - nonprod
+  updateInterval: 60000
   git:
     url: https://github.com/kevb/swarm-sync-example
     branch: master
-    updateInterval: 60000
   #gitCrypt:
   #  keyFile: /run/secrets/git-crypt-key
   docker:
     host: unix:///var/run/docker.sock
     socketPath: /var/run/docker.sock
-    updateInterval: 40000
