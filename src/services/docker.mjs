@@ -5,6 +5,8 @@ import drc from 'docker-registry-client';
 import config from '../config';
 import { wait } from '../utils';
 
+const DEFAULT_TAG_PATTERN_TYPE = 'glob';
+
 const docker = new Docker({ socketPath: config.docker.socketPath });
 const REQUEST_DELAY_MS = 5000;
 let started = false;
@@ -17,7 +19,7 @@ async function listTags(image) {
   });
 }
 
-async function updateServiceImage(id, image) {
+async function updateServiceImage(id, image) { 
 
     const serviceData = await docker.getService(id).inspect();
     const update = serviceData.Spec;
@@ -30,23 +32,56 @@ async function updateServiceImage(id, image) {
     return docker.getService(id).update(update);
 }
 
+/**
+ * Takes a tag_pattern property, e.g. 'glob:5.*' or 'semver:1.0.0'
+ * Returns [type, pattern]
+ * If type is missing, e.g. '1.*.*', DEFAULT_TAG_PATTERN_TYPE will be used instead
+ */
+function getFilter(tagPattern) {
+  let [type, pattern] = tagPattern.split(':');
+  if (!pattern) {
+    pattern = type;
+    type = 'glob';
+  }
+
+  //if (type === ...) { }
+
+  //Default glob
+  return (tag) => minimatch(tag, pattern)
+}
+
+//TODO - some patterns may require different type of sort
+// e.g. Does 'glob' really want a semvar sort??
+// needs more thought...
+function getSort(tagPattern) {
+
+  //Default
+  return compareVersions;
+}
+
+async function getLatestTag(image, tagPattern) {
+  const tagsData = await listTags(image);
+  const filter = getFilter(tagPattern);
+  const sort = getSort(tagPattern);
+
+  const tags = tagsData.tags
+    .filter((t) => filter(t))
+    .sort(sort);
+
+  if (tags.length) {
+    return tags[tags.length - 1];
+  } else {
+    // Is it considered an error if no tags match??
+    console.warn(`No matching tag found for ${image} with tag_pattern ${tagPattern}`)
+  }
+}
+
 async function checkUpdateService(service) {
 
   const image = drc.parseRepoAndRef(service.current_image);
-  const tagsData = await listTags(image.canonicalName)
-  const tags = tagsData.tags
-    .filter((t) => minimatch(t, service.pattern))
-    .sort(compareVersions);
+  const newestTag = await getLatestTag(image.canonicalName, service.pattern)
 
-  //No matching tags - is it considered an error?
-  if (tags.length === 0) {
-    console.warn("No tags matched the image update pattern!")
-    return false
-  }
-
-  const newestTag = tags[tags.length - 1];
-
-  if (newestTag !== service.current_image_tag) {
+  if (newestTag && newestTag !== service.current_image_tag) {
     await updateServiceImage(service.id, `${service.current_image_name}:${newestTag}`);
     return { 
       service: service.name,

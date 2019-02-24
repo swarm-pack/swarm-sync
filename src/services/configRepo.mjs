@@ -5,7 +5,8 @@ import yaml from 'js-yaml';
 import fs from 'fs-extra';
 import { resolve, basename } from 'path';
 import config from '../config';
-import { getDeployedStackPackCommit, getDeployedStackCommit } from './state'
+import { getDeployedStackPackCommit, getDeployedStackCommit } from './state';
+import { findKeyInObject } from '../utils';
 
 const GIT_SSH_COMMAND = "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no";
 
@@ -57,6 +58,31 @@ class ConfigRepository {
 
   async getPackLastCommit(pack) {
     return this.repo.log({ file: `packs/${pack}` }).then(log => log.latest.hash)
+  }
+
+  /**
+   * Like Helm/Flux we interpret some specific structures in values
+   * and automatically process them in a specific way
+   * https://github.com/stefanprodan/gitops-helm
+   *
+   * image:
+   *   repository: ngninx
+   *   tag: 1.4.1
+   *   tag_pattern: 1.4.*
+   *
+   *  In this instance tag_pattern will be matched in registry and the latest matching
+   *  tag will replace `tag` in values when passed into swarm-pack
+   */
+  async preparePackValues(pack) {
+    const values = pack.values || [];
+
+    for (const [valueName, valueDef] of findKeyInObject('image', values)) {
+      if (valueDef.hasOwnProperty('tag-pattern')) {
+        valueDef.tag = await docker.getLatestTag(valueDef.image, valueDef.tag_pattern);
+      }
+    }
+
+    return values;
   }
 
   async checkForUpdates() {

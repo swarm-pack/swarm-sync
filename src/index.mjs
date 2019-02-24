@@ -16,19 +16,20 @@ nodeCleanup((exitCode, signal) => {
   process.kill(process.pid, signal);
 });
 
+
 async function startCheckAndDeployRepo() {
   console.log('Polling git repository for changes');
 
   const changes = await repo.checkForUpdates();
-
   if (changes.length) {
     console.log(`Changes found, redeploying ${changes.length} stacks`);
-
     for (const change of changes) {
       for (const pack of change.packs) {
         console.log(`Running equivalent to: swarm-pack deploy ${repo.getFullPathToPack(pack.pack)} ${change.stack}`);
         await swarmpack.compileAndDeploy({
-          stack: change.stack, packDir: repo.getFullPathToPack(pack.pack), values: pack.values,
+          stack: change.stack,
+          packDir: repo.getFullPathToPack(pack.pack),
+          values: await repo.preparePackValues(pack.values),
         });
         setDeployedStackPackCommit(change.stack, pack.pack, await repo.getPackLastCommit(pack.pack));
       }
@@ -38,6 +39,7 @@ async function startCheckAndDeployRepo() {
     console.log('No changes in config repository to deploy');
   }
 }
+
 
 async function startCheckAndUpdateImages() {
   const changes = await docker.checkAndUpdateImages();
