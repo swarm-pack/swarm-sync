@@ -8,5 +8,4 @@ swarm-sync:
   #gitCrypt:
   #  keyFile: /run/secrets/git-crypt-key
   docker:
-    host: unix:///var/run/docker.sock
     socketPath: /var/run/docker.sock

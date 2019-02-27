@@ -4,7 +4,7 @@ import yaml from 'js-yaml';
 
 // TODO - probably will move away from file on volume approach eventually
 
-const stateStoragePath = process.env.STATE_STORAGE_FILE || false;
+const stateStoragePath = process.env.SWARM_SYNC_STATE_FILE || false;
 
 let state = {};
 

@@ -1,3 +1,5 @@
+#! /usr/bin/env node --experimental-modules
+
 import nodeCleanup from 'node-cleanup';
 import fs from 'fs-extra';
 import swarmpack from 'swarm-pack';
@@ -29,6 +31,7 @@ async function startCheckAndDeployRepo() {
         await swarmpack.compileAndDeploy({
           stack: change.stack,
           packDir: repo.getFullPathToPack(pack.pack),
+          secretsDir: repo.getSecretsDir(change.stack),
           values: await repo.preparePackValues(pack.values),
         });
         setDeployedStackPackCommit(change.stack, pack.pack, await repo.getPackLastCommit(pack.pack));
@@ -54,7 +57,12 @@ async function startUpdates() {
   try {
     await startCheckAndDeployRepo();
     await startCheckAndUpdateImages();
-    setTimeout(startUpdates, config.updateInterval);
+    if (!config.once_only) {
+      setTimeout(startUpdates, config.updateInterval);
+    } else {
+      console.log('Deploying once only, due to configuration');
+      process.exit(0);
+    }
   } catch (error) {
     console.log(error);
     process.exit(1);

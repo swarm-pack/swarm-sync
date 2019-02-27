@@ -52,8 +52,12 @@ class ConfigRepository {
     return this.readFileSync
   }
 
+  getSecretsDir(stack) {
+    return resolve(this.path, 'stacks', stack, 'secrets');
+  }
+
   async getStackLastCommit(stack) {
-    return this.repo.log({ file: `stacks/${stack}.yml` }).then(log => log.latest.hash)
+    return this.repo.log({ file: `stacks/${stack}` }).then(log => log.latest.hash)
   }
 
   async getPackLastCommit(pack) {
@@ -73,12 +77,11 @@ class ConfigRepository {
    *  In this instance tag_pattern will be matched in registry and the latest matching
    *  tag will replace `tag` in values when passed into swarm-pack
    */
-  async preparePackValues(pack) {
-    const values = pack.values || [];
-
-    for (const [valueName, valueDef] of findKeyInObject('image', values)) {
-      if (valueDef.hasOwnProperty('tag-pattern')) {
-        valueDef.tag = await docker.getLatestTag(valueDef.image, valueDef.tag_pattern);
+  async preparePackValues(values={}) {
+    if (!values) return {};
+    for (let imageDef of findKeyInObject('image', values)) {
+      if (imageDef.hasOwnProperty('tag-pattern')) {
+        imageDef.tag = await docker.getLatestTag(imageDef.image, imageDef.tag_pattern);
       }
     }
 
@@ -86,49 +89,49 @@ class ConfigRepository {
   }
 
   async checkForUpdates() {
-    return this.repo.pull()
-      .then(() => this.gitCryptUnlock())
-      // Get list of stacks & packs
-      .then(() => fs.readdir(resolve(this.path, 'stacks')).then(stackFiles => stackFiles.map(sf => basename(sf, '.yml'))))
-      .then((stacks) => fs.readdir(resolve(this.path, 'packs')).then((packs) => ({stacks, packs})))
-      .then(async({stacks, packs}) => {
 
-        // Stacks in target are defined in config.stacks, and have a corresponding stacks/[stack].yml in the repo
-        const targetStacks = stacks.filter(s => s.includes(config.stacks));
-        console.log(`Target stacks found: ${targetStacks.join(',')}`);
+    await this.repo.pull();
+    await this.gitCryptUnlock();
+    const stacks = await fs.readdir(resolve(this.path, 'stacks'));
+    const packs = await fs.readdir(resolve(this.path, 'packs'));
+    // TODO - maybe want to handle if directory is messy. 
+    // For now, assume it only contains name stack / packs dirs.
 
-        // Changes [{stack: 'foo', packs: 'bar'}] is a list of stacks (and it's packs) that changed
-        const changes = [];
 
-        for (const stack of targetStacks) {
-          const stackDefinition = yaml.safeLoad(fs.readFileSync(resolve(this.path, 'stacks', `${stack}.yml`), 'utf8'));
+    // Stacks in target are defined in config.stacks, and have a corresponding stacks/[stack-name]/stack.yml in the repo
+    const targetStacks = stacks.filter(s => s.includes(config.stacks));
+    console.log(`Target stacks found: ${targetStacks.join(',')}`);
 
-          if (getDeployedStackCommit(stack) !== await this.getStackLastCommit(stack)) {
-            changes.push({
-              stack,
-              packs: stackDefinition.packs
-            })
-          }else {
-            // Individual pack changes for stack
-            const changedStackPacks = [];
-            for (const pack of stackDefinition.packs) {
-              if (getDeployedStackPackCommit(stack, pack.pack) !== await this.getPackLastCommit(pack.pack)) {
-                changedStackPacks.push(pack)
-              }
-            }
+    // Changes [{stack: 'foo', packs: 'bar'}] is a list of stacks (and it's packs) that changed
+    const changes = [];
 
-            //If any changes in any individual pack, add as changes
-            if (changedStackPacks.length > 0) {
-              changes.push({
-                stack,
-                packs: changedStackPacks
-              })
-            }
+    for (const stack of targetStacks) {
+      const stackDefinition = yaml.safeLoad(fs.readFileSync(resolve(this.path, 'stacks', stack, 'stack.yml'), 'utf8'));
+
+      if (getDeployedStackCommit(stack) !== await this.getStackLastCommit(stack)) {
+        changes.push({
+          stack,
+          packs: stackDefinition.packs
+        })
+      }else {
+        // Individual pack changes for stack
+        const changedStackPacks = [];
+        for (const pack of stackDefinition.packs) {
+          if (getDeployedStackPackCommit(stack, pack.pack) !== await this.getPackLastCommit(pack.pack)) {
+            changedStackPacks.push(pack)
           }
         }
 
-        return changes;
-      })
+        //If any changes in any individual pack, add as changes
+        if (changedStackPacks.length > 0) {
+          changes.push({
+            stack,
+            packs: changedStackPacks
+          })
+        }
+      }
+    }
+    return changes;
   }
 }
 

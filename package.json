@@ -20,6 +20,7 @@
     "apollo-server-express": "^1.3.6",
     "body-parser": "^1.18.3",
     "compare-versions": "^3.4.0",
+    "config": "^3.0.1",
     "docker-registry-client": "^3.3.0",
     "dockerode": "^2.5.8",
     "dotenv": "^6.0.0",
@@ -40,7 +41,7 @@
     "request-promise-native": "^1.0.5",
     "shelljs": "^0.8.3",
     "simple-git": "^1.107.0",
-    "swarm-pack": "https://github.com/vudknguyen/swarm-pack.git#features/opinionated_refactor",
+    "swarm-pack": "https://github.com/vudknguyen/swarm-pack.git",
     "tmp": "^0.0.33",
     "winston": "2.4.3",
     "winston-papertrail": "^1.0.5"

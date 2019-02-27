@@ -1,8 +1,8 @@
 FROM node:11-alpine
 # set app port
 ENV PORT 80
-ENV CONFIG_FILE /etc/swarm-sync.yml
-ENV STATE_STORAGE_FILE /run/swarm-sync/state
+ENV SWARM_SYNC_CONFIG_FILE /etc/swarm-sync.yml
+ENV SWARM_SYNC_STATE_FILE /run/swarm-sync/state
 
 WORKDIR /www
 

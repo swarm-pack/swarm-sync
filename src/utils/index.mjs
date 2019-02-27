@@ -12,12 +12,12 @@ async function wait(ms) {
  */
 function findKeyInObject(key, object) {
   let found = [];
-  for ([objectKey, objectValue] of Object.entries(object)) {
+  for (const [objectKey, objectValue] of Object.entries(object)) {
     if (objectKey === key) {
       found.push(objectValue);
     }else {
       if (typeof objectValue === 'object') {
-        found = [...found, ...findKeysInObject(key, objectValue)]
+        found = [...found, ...findKeyInObject(key, objectValue)]
       }
     }
   }
