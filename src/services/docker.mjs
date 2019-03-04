@@ -137,4 +137,7 @@ async function checkAndUpdateImages() {
   }
 }
 
-export default { checkAndUpdateImages };
+export default {
+  checkAndUpdateImages,
+  getLatestTag 
+};

@@ -1,5 +1,4 @@
 #! /usr/bin/env node --experimental-modules
-
 import nodeCleanup from 'node-cleanup';
 import fs from 'fs-extra';
 import swarmpack from 'swarm-pack';
@@ -21,22 +20,20 @@ nodeCleanup((exitCode, signal) => {
 
 async function startCheckAndDeployRepo() {
   console.log('Polling git repository for changes');
-
-  const changes = await repo.checkForUpdates();
-  if (changes.length) {
-    console.log(`Changes found, redeploying ${changes.length} stacks`);
-    for (const change of changes) {
-      for (const pack of change.packs) {
-        console.log(`Running equivalent to: swarm-pack deploy ${repo.getFullPathToPack(pack.pack)} ${change.stack}`);
+  const changedStacks = await repo.checkForUpdates();
+  if (changedStacks.length) {
+    console.log(`Changes found, redeploying ${changedStacks.length} stacks`);
+    for (const changedStack of changedStacks) {
+      for (const pack of changedStack.packs) {
+        console.log(`Running equivalent to: swarm-pack deploy ${pack.ref} ${changedStack.stack.name}`);
         await swarmpack.compileAndDeploy({
-          stack: change.stack,
-          packDir: repo.getFullPathToPack(pack.pack),
-          secretsDir: repo.getSecretsDir(change.stack),
-          values: await repo.preparePackValues(pack.values),
+          stack: changedStack.stack.name,
+          packRef: pack.ref,
+          values: await pack.getPreparedValues(),
         });
-        setDeployedStackPackCommit(change.stack, pack.pack, await repo.getPackLastCommit(pack.pack));
+        setDeployedStackPackCommit(changedStack.stack.name, pack.pack, await pack.getLastCommit());
       }
-      setDeployedStackCommit(change.stack, await repo.getStackLastCommit(change.stack));
+      setDeployedStackCommit(changedStack.stack.name, await changedStack.stack.getLastCommit());
     }
   } else {
     console.log('No changes in config repository to deploy');
@@ -47,7 +44,7 @@ async function startCheckAndDeployRepo() {
 async function startCheckAndUpdateImages() {
   const changes = await docker.checkAndUpdateImages();
   if (changes.length > 0) {
-    console.log(`${changes.length} service image${changes.length > 1 ? 's' : ''} updated:`);
+    console.log(`${changes.length} service image${changes.length > 1 ? 's' : ''} updated`);
   } else {
     console.log('No image updates found');
   }
