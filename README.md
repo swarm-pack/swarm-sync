@@ -11,11 +11,11 @@ The best way to understand the Config Repo is by looking at the [**example Confi
 ### Diagram
 
 <pre>
-                 +----------+            +----------+            +------------+
- @               | code     |            |          |            | Container  |
--|-  +---------> |   repo   +----------->+    CI    +----------->+   Registry |
-/ \   commit     |          |   build    |          |   push     |            |
-                 +----------+            +----------+            +------------+
+                 +---------+            +---------+            +-----------+
+ @               |  Code   |            |         |            | Container |
+-|-  +---------> |   Repo  +----------->+   CI    +----------->+  Registry |
+/ \   commit     |         |   build    |         |   push     |           |
+                 +---------+            +---------+            +-----------+
 Developer                                                              |
                                                                        |
                                                                        |
@@ -23,11 +23,11 @@ Developer                                                              |
                                                 |
                                                 |
                                                 v
-                  +----------+            +-----------+           +------------+
- @                | config   |            |           |           |  Docker    |
--|-  +--------->  |   repo   <----------->+ SwarmSync +----------->    Swarm   |
-/ \   commit      |          |   sync     |           |   apply   |            |
-                  +----------+            +-----------+           +------------+              
+                  +---------+            +-----------+           +-----------+
+ @                | Config  |            |  Swarm    |           |  Docker   |
+-|-  +--------->  |   Repo  <----------->+    Sync   +----------->    Swarm  |
+/ \   commit      |         |   sync     |           |   apply   |           |
+                  +---------+            +-----------+           +-----------+              
 Developer
 </pre>
 
