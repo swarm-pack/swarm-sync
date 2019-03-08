@@ -16,10 +16,10 @@ The best way to understand the Config Repo is by looking at the [**example Confi
 -|-  +---------> |   Repo  +----------->+   CI    +----------->+  Registry |
 / \   commit     |         |   build    |         |   push     |           |
                  +---------+            +---------+            +-----------+
-Developer                                                              |
-                                                                       |
-                                                                       |
-                                                +----------------------+
+Developer                                                            |
+                                                                     |
+                                                                     |
+                                                +--------------------+
                                                 |
                                                 |
                                                 v
