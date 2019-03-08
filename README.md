@@ -1,7 +1,4 @@
-# swarm-sync
-GitOps for Docker Swarm
-
-## Overview
+# Swarm Sync
 
 GitOps, a term coined by [WeaveWorks](https://www.weave.works/blog/gitops-operations-by-pull-request), is a way to do continuous delivery and manage your environments through git using pull requests.
 
