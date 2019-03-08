@@ -1,31 +1,37 @@
 # swarm-sync
-Flux-like GitOps for Docker Swarm
+GitOps for Docker Swarm
 
 ## Overview
+
+GitOps, a term coined by [WeaveWorks](https://www.weave.works/blog/gitops-operations-by-pull-request), is a way to do continuous delivery and manage your environments through git using pull requests.
+
+Swarm-sync runs as a service in your Docker Swarm. It watches a Config Repo (a git repository managed by you) for changes and deploys them to your Swarm. Additionally it can watch Docker Registries for new images for your services and update you swarm Services accordingly.
+
+The Config Repo contains a set of [Swarm Packs](https://github.com/swarm-pack/swarm-pack) and configuration values which will be used to set up your Swarm Services.
+
+The best way to understand the Config Repo is by looking at the [**example Config Repo**](https://github.com/swarm-pack/swarm-sync-example).
 
 ### Diagram
 
 <pre>
-    XXX
-    XXX                 +----------+            +----------+            +------------+
-     X                  | code     |            |          |            | Container  |
-   XXXXX    +---------> |   repo   +----------->+    CI    +----------->+   Registry |
-     X       commit     |          |   build    |          |   push     |            |
-   XXXX                 +----------+            +----------+            +------------+
-  X    X                                                                       |
- Developer                                                                     |
-                                                                               |
-                                                      +------------------------+
-                                                      |
-                                                      |
-    XXX                                               v
-    XXX                 +----------+            +-----------+           +------------+
-     X                  | config   |            |           |           |  Docker    |
-   XXXXX    +---------> |   repo   <----------->+ SwarmSync +----------->    Swarm   |
-     X       commit     |          |   sync     |           |   apply   |            |
-   XXXX                 +----------+            +-----------+           +------------+
-  X    X
- Developer
+                 +----------+            +----------+            +------------+
+ @               | code     |            |          |            | Container  |
+-|-  +---------> |   repo   +----------->+    CI    +----------->+   Registry |
+/ \   commit     |          |   build    |          |   push     |            |
+                 +----------+            +----------+            +------------+
+Developer                                                              |
+                                                                       |
+                                                                       |
+                                                +----------------------+
+                                                |
+                                                |
+                                                v
+                  +----------+            +-----------+           +------------+
+ @                | config   |            |           |           |  Docker    |
+-|-  +--------->  |   repo   <----------->+ SwarmSync +----------->    Swarm   |
+/ \   commit      |          |   sync     |           |   apply   |            |
+                  +----------+            +-----------+           +------------+              
+Developer
 </pre>
 
 
@@ -41,53 +47,84 @@ There are 3 main components needed to achieve our GitOps pipeline:
 
 ### Swarm-Pack
 
-Swarm-Sync relies on [vudknguyen/swarm-pack](https://github.com/vudknguyen/swarm-pack) to compile and deploy services from templates.
+Swarm-Sync relies on [vudknguyen/swarm-pack](https://github.com/swarm-pack/swarm-pack) to compile and deploy services from templates. An understanding of swarm-pack is required to use swarm-sync, so if you haven't already take a look there.
 
-### How it works
+### Quick-start guide
 
-- Swarm-sync is configured to point to a configuration repository URL
-- *Check if services exist, read labels to ensure they are managed by swarm-sync??*
-- Apply the configuration to the Swarm using swarm-pack
-- *Annotate services with labels, store history etc??*
-- Watch registry for changes to images & update service(s) when new digest available
+1. Fork the repo https://github.com/swarm-pack/swarm-sync-example - this guide will use this URL, but you should replace with your own fork and re-configure your own desired config.
 
-### Try it out
+2. Create a config file for swarm-sync, similar to this one:
 
-**Prerequisites::** Docker running on local machine in Swarm mode
+```yaml
+swarm-sync:
 
-1. Run `yarn start:dev` - it will by default use the repo at https://github.com/kevb/swarm-sync-example
-2. Wait a few moments, you will have an nginx service started
-3. Wait a few more moments and it will update to the latest image matching pattern "1.*.*"
-4. Try manually changing the service image: `docker service update nonprod_swarm-sync --image=nginx:1.14.2`
-5. Wait a few moments, it will automatically update it back to the latest image
+  # Stacks in target for this swarm-sync instance
+  stacks:
+    - nonprod
 
-## Installing
+  # Update frequency for polling repo and image registry for changes (ms)
+  # Below 1 minute not recommended
+  updateInterval: 60000
 
-### Quickstart
+  # Git details for your Swarm Configuration Repository
+  git:
+    url: https://github.com/swarm-pack/swarm-sync-example
+    branch: master
 
-`docker stack deploy ...`
+  # Common config with swarm-pack
+  docker:
+    socketPath: /var/run/docker.sock
+  repositories:
+    - name: official
+      url: https://github.com/swarm-pack/repository
+```
+
+Upload this file to a manager node in your Swarm
+
+3. On the manager node, run
+
+```
+docker run -it \
+ -v /var/run/docker.sock:/var/run/docker.sock \
+ -v /path/to/swarm-sync.yml:/etc/swarm-sync.yml \
+ kevbuk/swarm-sync --once
+```
+
+This uses the "--once" flag for swarm-sync, meaning it will not run as a daemon. That's because in our example config repo we have a swarm-pack configured for swarm-sync, so it will be deployed as a service. Make sure the swarm-sync config is the same inside your Config Repo values.
+
+4. Check your desired services are now running on your Swarm
+
+```bash
+docker service ls
+```
+
+5. Push a change to your config repo, and check that the services update themselves within 5 minutes!
+
+### Stacks
+
+Stacks are a way to namespace things, and identify what is in scope for a particular instance of Swarm Sync.
+
+For example, you might have 2 Swarms: **prod** and **nonprod**. One approach is to create corresponding Stacks in your config repo at `stacks/prod` and `stacks/nonprod`. Each Swarm has an instance of swarm-sync with different config files. In your ***prod*** Stack instance, you would have:
+```yaml
+stacks:
+  - prod
+```
+
+In your **nonprod** instance you'd have
+```yaml
+stacks:
+  - nonprod
+```
+
+With this configuration, the stack defined in `stacks/nonprod/stack.yml` will be synced to your **nonprod** Swarm and the stack defined in `stacks/prod/stack.yml` will be synced to your **prod** Swarm.
 
 ### Configuration
 
 Config file should be mounted at /etc/swarm-sync.yml and Docker Config or Docker Secret is recommended for this.
 
-Example:
-
-```yaml
-swarm-sync:
-  git:
-    url: git@github.com:kevb/swarm-sync-example
-    branch: master
-```
-
-### Bootstrapping
-
-How do we bootstrap such that swarm-sync service definition & config is stored in our config repo and managed by swarm-sync??
-
-
 ## Development
 
-Node v10.4.1
+Node v11.9.0
 Yarn v1.7.0
 
 Install dependencies
@@ -99,5 +136,5 @@ yarn install
 Start server development
 
 ```bash
-yarn start
+yarn start:dev
 ```
