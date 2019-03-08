@@ -44,7 +44,7 @@ There are 3 main components needed to achieve our GitOps pipeline:
 
 ### Swarm-Pack
 
-Swarm-Sync relies on [vudknguyen/swarm-pack](https://github.com/swarm-pack/swarm-pack) to compile and deploy services from templates. An understanding of swarm-pack is required to use swarm-sync, so if you haven't already take a look there.
+Swarm-Sync relies on [Swarm Pack](https://github.com/swarm-pack/swarm-pack) to compile and deploy services from templates. An understanding of swarm-pack is required to use swarm-sync, so if you haven't already take a look there.
 
 ### Quick-start guide
 
