@@ -11,7 +11,7 @@ class Stack {
     this.name = name;
     this.git = git(configRepoPath);
     // Instantiate packs
-    this.packs = stackDef.packs.map(packDef => new Pack({packDef, configRepoPath}))
+    this.packs = stackDef.packs.map(packDef => new Pack({packDef, stackName: this.name, configRepoPath}))
   }
 
   async getLastCommit() {

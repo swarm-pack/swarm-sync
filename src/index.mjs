@@ -1,13 +1,14 @@
 #! /usr/bin/env node --experimental-modules
 import nodeCleanup from 'node-cleanup';
 import fs from 'fs-extra';
-import swarmpack from 'swarm-pack';
+import SwarmPack from 'swarm-pack';
 import ConfigRepo from './services/configRepo';
 import docker from './services/docker';
 import config from './config';
 import { setDeployedStackCommit, setDeployedStackPackCommit } from './services/state';
 
 const repo = new ConfigRepo();
+const swarmpack = SwarmPack({ config: config.swarmpack });
 
 nodeCleanup((exitCode, signal) => {
   console.log('Clean up & exit...');

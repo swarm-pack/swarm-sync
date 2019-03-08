@@ -1,11 +1,25 @@
 swarm-sync:
+
+  # Stacks in target for this swarm-sync instance
   stacks:
     - nonprod
+
+  # Update frequency for polling repo and image registry for changes (ms)
+  # Below 1 minute not recommended
   updateInterval: 60000
+
+  # Git details for your Swarm Configuration Repository
   git:
-    url: https://github.com/kevb/swarm-sync-example
+    url: https://github.com/swarm-pack/swarm-sync-example
     branch: master
+
+  # Swarm-sync can run git-crypt to decrypt your repo with a symmetric key
   #gitCrypt:
   #  keyFile: /run/secrets/git-crypt-key
+
+  # Common config with swarm-pack
   docker:
     socketPath: /var/run/docker.sock
+  repositories:
+    - name: official
+      url: https://github.com/swarm-pack/repository

@@ -1,12 +1,26 @@
 import { join } from 'path';
-import swarmpack from 'swarm-pack';
+import SwarmPack from 'swarm-pack';
+import yaml from 'js-yaml';
+import fs from 'fs-extra';
 import docker from '../services/docker';
 import { findKeyInObject } from '../utils';
+import config from '../config';
+
+const swarmpack = SwarmPack({ config: config.swarmpack });
 
 class Pack {
-  constructor({packDef, configRepoPath}) {
+  constructor({packDef, stackName, configRepoPath}) {
     this.packDef = packDef;
-    this.values = packDef.values;
+    if (packDef.values && packDef.values_file) {
+      throw new Error ("Cannot define both values and values_file for stack at the same time.")
+    }
+
+    if (packDef.values_file) {
+      this.values = yaml.safeLoad(fs.readFileSync(join(configRepoPath, 'stacks', stackName, 'values', packDef.values_file), 'utf8'));
+    }else {
+      this.values = packDef.values;
+    }
+
     this.pack = packDef.pack;
     // Normalize path
     if (!packDef.pack.includes("/") && !packDef.pack.includes(":") && !packDef.pack.includes("\\")) {

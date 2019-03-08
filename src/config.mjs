@@ -16,7 +16,6 @@ if (process.argv.includes('--once')) {
 }
 
 // Validations, defaults, transformations etc
-
 if (config.docker.socketPath && config.docker.host) {
   throw new Error('Cannot specify both docker.socketPath & docker.host in configuration.');
 }
@@ -26,5 +25,11 @@ if (config.docker.host) {
 } else {
   config.docker.url = `unix://${config.docker.socketPath || '/var/run/docker.sock'}`;
 }
+
+// Create a swarm-pack config to easily pass into swarm-pack
+config.swarmpack = {
+  docker: config.docker,
+  repositories: config.repositories,
+};
 
 export default config;
