@@ -23,8 +23,7 @@ async function updateTagCache(repo, pattern) {
   console.log(`Updating image tag cache for ${repo}...`);
 
   if (pattern) {
-    const filter = patterns.getFilter(pattern);
-    tagList = tagList.filter(filter);
+    tagList = tagList.filter(patterns.getFilter(pattern));
   }
 
   for (const tag of tagList) {
