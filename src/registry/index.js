@@ -12,7 +12,6 @@ function getCacheKey(repo) {
 
 // TODO - We don't currently handle server errors, retries etc. Rate limiting not yet tuned...
 // TODO - This implementation assumes tags are immutable. This assumption needs to be confirmed.
-
 async function updateTagCache(repo, pattern) {
   // TODO - we might need to sanitize "repo" for cachekey as it probably contains illegal chars
   const cacheKey = getCacheKey(repo);
@@ -29,7 +28,7 @@ async function updateTagCache(repo, pattern) {
   }
 
   for (const tag of tagList) {
-    if (tagCache.findIndex(t => t.tag === tag) === -1) {
+    if (!tagCache.find(t => t.tag === tag)) {
       const tagEntry = {
         tag,
         firstSeen: fetchedAt
@@ -48,12 +47,8 @@ async function updateTagCache(repo, pattern) {
 }
 
 function getCachedTags(repo, pattern) {
-  let tagCache = cache.get(getCacheKey(repo)) || [];
-  if (pattern) {
-    const filter = patterns.getFilter(pattern);
-    tagCache = tagCache.filter(filter);
-  }
-  return tagCache;
+  const tagCache = cache.get(getCacheKey(repo)) || [];
+  return pattern ? tagCache.filter(patterns.getFilter(pattern)) : tagCache;
 }
 
 function getNewestTagFromCache(repo, pattern) {

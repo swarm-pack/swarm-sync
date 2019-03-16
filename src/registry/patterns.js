@@ -24,9 +24,7 @@ function splitTypeAndPattern(tagPattern) {
 // Does this particular pattern sort semantically
 // i.e. doesn't care about created timestamp
 function isSemanticSort(tagPattern) {
-  const { type } = splitTypeAndPattern(tagPattern);
-  if (type === 'semver') return true;
-  return false;
+  return splitTypeAndPattern(tagPattern).type === 'semver';
 }
 
 const filters = {
@@ -51,12 +49,9 @@ function getFilter(tagPattern) {
 function getSort(tagPattern) {
   const { type } = splitTypeAndPattern(tagPattern);
 
-  if (type === 'semver') {
-    return (a, b) => compareVersions(a.tag, b.tag);
-  }
-
-  // Default (for glob, literal)
-  return (a, b) => a.created - b.created;
+  return type === 'semver'
+    ? (a, b) => compareVersions(a.tag, b.tag)
+    : (a, b) => a.created - b.created; // Default (for glob, literal)
 }
 
 module.exports = {
