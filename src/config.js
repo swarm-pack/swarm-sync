@@ -1,5 +1,5 @@
-import yaml from 'js-yaml';
-import fs from 'fs';
+const yaml = require('js-yaml');
+const fs = require('fs');
 
 // Environment options
 const configFilePath = process.env.SWARM_SYNC_CONFIG_FILE || './config/swarm-sync.yml';
@@ -32,4 +32,4 @@ config.swarmpack = {
   repositories: config.repositories,
 };
 
-export default config;
+module.exports = config;

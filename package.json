@@ -10,8 +10,8 @@
     "node": ">=10.4"
   },
   "scripts": {
-    "start": "node --experimental-modules src/index.mjs",
-    "start:dev": "nodemon --exec node --experimental-modules src/index.mjs",
+    "start": "node src/index.js",
+    "dev": "nodemon --exec node src/index.js",
     "precommit": "yarn run lint",
     "lint": "eslint src/**"
   },
@@ -19,6 +19,7 @@
     "apollo-errors": "^1.9.0",
     "apollo-server-express": "^1.3.6",
     "body-parser": "^1.18.3",
+    "commander": "^2.19.0",
     "compare-versions": "^3.4.0",
     "config": "^3.0.1",
     "docker-registry-client": "^3.3.0",
@@ -34,16 +35,19 @@
     "lodash": "^4.17.10",
     "minimatch": "^3.0.4",
     "mongoose": "^5.1.5",
+    "node-cache": "^4.2.0",
     "node-cleanup": "^2.1.2",
     "p-iteration": "^1.1.7",
     "project-version": "^1.0.0",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
     "request-promise-native": "^1.0.5",
+    "semver": "^5.6.0",
     "shelljs": "^0.8.3",
     "simple-git": "^1.107.0",
     "swarm-pack": "https://github.com/swarm-pack/swarm-pack.git",
     "tmp": "^0.0.33",
+    "utf8": "^3.0.0",
     "winston": "2.4.3",
     "winston-papertrail": "^1.0.5"
   },

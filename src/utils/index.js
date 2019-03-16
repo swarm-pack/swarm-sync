@@ -1,3 +1,5 @@
+
+
 /**
  * Async function to wait specific amount of `ms` then resolve a promise (no return value)
  */
@@ -15,13 +17,11 @@ function findKeyInObject(key, object) {
   for (const [objectKey, objectValue] of Object.entries(object)) {
     if (objectKey === key) {
       found.push(objectValue);
-    }else {
-      if (typeof objectValue === 'object') {
-        found = [...found, ...findKeyInObject(key, objectValue)]
-      }
+    } else if (typeof objectValue === 'object') {
+      found = [...found, ...findKeyInObject(key, objectValue)];
     }
   }
-  return found
+  return found;
 }
 
-export { wait, findKeyInObject };
+module.exports = { wait, findKeyInObject };

@@ -1,42 +1,42 @@
-import { join } from 'path';
-import SwarmPack from 'swarm-pack';
-import yaml from 'js-yaml';
-import fs from 'fs-extra';
-import docker from '../services/docker';
-import { findKeyInObject } from '../utils';
-import config from '../config';
+const { join } = require('path');
+const SwarmPack = require('swarm-pack');
+const yaml = require('js-yaml');
+const fs = require('fs-extra');
+const { updateTagCache, getNewestTagFromCache } = require('../registry');
+const { findKeyInObject } = require('../utils');
+const config = require('../config');
 
 const swarmpack = SwarmPack({ config: config.swarmpack });
 
 class Pack {
-  constructor({packDef, stackName, configRepoPath}) {
+  constructor({ packDef, stackName, configRepoPath }) {
     this.packDef = packDef;
     if (packDef.values && packDef.values_file) {
-      throw new Error ("Cannot define both values and values_file for stack at the same time.")
+      throw new Error('Cannot define both values and values_file for stack at the same time.');
     }
 
     if (packDef.values_file) {
       this.values = yaml.safeLoad(fs.readFileSync(join(configRepoPath, 'stacks', stackName, 'values', packDef.values_file), 'utf8'));
-    }else {
+    } else {
       this.values = packDef.values;
     }
 
     this.pack = packDef.pack;
     // Normalize path
-    if (!packDef.pack.includes("/") && !packDef.pack.includes(":") && !packDef.pack.includes("\\")) {
+    if (!packDef.pack.includes('/') && !packDef.pack.includes(':') && !packDef.pack.includes('\\')) {
       // Pack refers to a pack inside the config repo /packs
-      this.ref = join(configRepoPath, 'packs', packDef.pack)
-    }else {
-      this.ref = packDef.pack
+      this.ref = join(configRepoPath, 'packs', packDef.pack);
+    } else {
+      this.ref = packDef.pack;
     }
   }
 
   async getLastCommit() {
-    return await this.inspect().then(i => i.commit_hash);
+    return this.inspect().then(i => i.commit_hash);
   }
 
   async inspect() {
-    return await swarmpack.inspectPack(this.ref);
+    return swarmpack.inspectPack(this.ref);
   }
 
   /**
@@ -54,14 +54,14 @@ class Pack {
    */
   async getPreparedValues() {
     if (!this.values) return {};
-    for (let imageDef of findKeyInObject('image', this.values)) {
-      if (imageDef['tag_pattern']) {
-        imageDef.tag = await docker.getLatestTag(imageDef.repository, imageDef.tag_pattern);
+    for (const imageDef of findKeyInObject('image', this.values)) {
+      if (imageDef.tag_pattern) {
+        await updateTagCache(imageDef.repository, imageDef.tag_pattern);
+        imageDef.tag = getNewestTagFromCache(imageDef.repository, imageDef.tag_pattern);
       }
     }
     return this.values;
   }
-
 }
 
-export default Pack
+module.exports = Pack;

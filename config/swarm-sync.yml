@@ -1,5 +1,8 @@
 swarm-sync:
 
+  # Cache dir
+
+
   # Stacks in target for this swarm-sync instance
   stacks:
     - nonprod
@@ -23,3 +26,6 @@ swarm-sync:
   repositories:
     - name: official
       url: https://github.com/swarm-pack/repository
+
+  # used for throttling time between Docker registry requests
+  minRegistryReqInterval: 10000
