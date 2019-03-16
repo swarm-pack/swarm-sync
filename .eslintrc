@@ -1,14 +1,20 @@
 {
   "rules": {
+    "prettier/prettier": ["error"],
     "function-paren-newline": "off",
     "no-underscore-dangle": "off",
-    "import/extensions": ["error", "always", {
-      js: "never",
-      mjs: "never",
-    }],
+    "import/extensions": [
+      "error",
+      "always",
+      {
+        "js": "never",
+        "mjs": "never"
+      }
+    ],
     "no-restricted-syntax": [0, "ForInStatement", "ForOfStatement"],
     "no-await-in-loop": [0, "ForInStatement", "ForOfStatement"],
-    "max-len": [1, 120, 2]
+    "max-len": [1, 120, 2],
+    "no-console": "off"
   },
   "globals": {
     "describe": true,
@@ -23,17 +29,12 @@
     "es6": true
   },
 
-  "extends": [
-    "airbnb-base"
-  ],
-
+  "extends": ["airbnb-base", "prettier"],
+  "plugins": ["prettier"],
   "settings": {
     "import/resolver": {
       "node": {
-        "extensions": [
-          ".js",
-          ".mjs"
-        ]
+        "extensions": [".js", ".mjs"]
       }
     }
   }

@@ -29,38 +29,21 @@ function isSemanticSort(tagPattern) {
   return false;
 }
 
+const filters = {
+  // TODO Since semver will (probably?) not care about created timestamp
+  // we should be able to filter down to the latest/highest tag sematically?
+  semver: pattern => tag => semver.satisfies(tag.tag || tag, pattern),
+  glob: pattern => tag => minimatch(tag.tag || tag, pattern),
+  literal: pattern => tag => (tag.tag || tag) === pattern
+};
+
 /**
  * Get filter function for a specified tag_pattern, e.g. 'semver:v1.0.*' or 'glob:*'
  * Filter function will accept tag as either string or object with .tag property
  * */
 function getFilter(tagPattern) {
   const { type, pattern } = splitTypeAndPattern(tagPattern);
-
-  // TODO Since semver will (probably?) not care about created timestamp
-  // we should be able to filter down to the latest/highest tag sematically?
-  if (type === 'semver') {
-    return (tag) => {
-      const t = semver.coerce(tag.tag ? tag.tag : tag);
-
-      // Value couldn't be coerced into semver
-      if (!t) return false;
-
-      return semver.satisfies(t, pattern);
-    };
-  }
-
-  if (type === 'glob') {
-    return tag => minimatch(tag.tag ? tag.tag : tag, pattern);
-  }
-
-  if (type === 'literal') {
-    return (tag) => {
-      const t = tag.tag ? tag.tag : tag;
-      return t === pattern;
-    };
-  }
-
-  return null;
+  return filters[type] ? filters[type](pattern) : false;
 }
 
 // TODO - some patterns may require different type of sort
@@ -79,5 +62,5 @@ function getSort(tagPattern) {
 module.exports = {
   getFilter,
   getSort,
-  isSemanticSort,
+  isSemanticSort
 };

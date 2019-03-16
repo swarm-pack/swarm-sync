@@ -32,7 +32,7 @@ async function updateTagCache(repo, pattern) {
     if (tagCache.findIndex(t => t.tag === tag) === -1) {
       const tagEntry = {
         tag,
-        firstSeen: fetchedAt,
+        firstSeen: fetchedAt
       };
 
       if (!patterns.isSemanticSort(pattern)) {
@@ -68,5 +68,5 @@ function getNewestTagFromCache(repo, pattern) {
 
 module.exports = {
   updateTagCache,
-  getNewestTagFromCache,
+  getNewestTagFromCache
 };

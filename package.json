@@ -13,7 +13,8 @@
     "start": "node src/index.js",
     "dev": "nodemon --exec node src/index.js",
     "precommit": "yarn run lint",
-    "lint": "eslint src/**"
+    "lint": "eslint src/**",
+    "prettier": "prettier --write"
   },
   "dependencies": {
     "apollo-errors": "^1.9.0",
@@ -63,11 +64,27 @@
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-config-prettier": "^4.0.0",
     "eslint-plugin-import": "^2.16.0",
-    "husky": "^0.14.3",
-    "lint-staged": "^7.2.0",
+    "eslint-plugin-prettier": "^3.0.1",
     "mocha": "^5.2.0",
     "nodemon": "^1.17.5",
-    "prettier": "^1.13.5",
-    "rimraf": "^2.6.2"
+    "prettier": "^1.16.4",
+    "rimraf": "^2.6.2",
+    "husky": "^1.3.1",
+    "lint-staged": "^8.1.5"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx}": [
+      "eslint --fix",
+      "git add"
+    ],
+    "src/**/*.{json,md,scss,yaml,yml}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

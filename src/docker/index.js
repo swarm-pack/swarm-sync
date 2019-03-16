@@ -44,5 +44,5 @@ async function updateServiceImage(id, image) {
 
 module.exports = {
   getManagedServices,
-  updateServiceImage,
+  updateServiceImage
 };

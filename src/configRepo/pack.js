@@ -12,18 +12,29 @@ class Pack {
   constructor({ packDef, stackName, configRepoPath }) {
     this.packDef = packDef;
     if (packDef.values && packDef.values_file) {
-      throw new Error('Cannot define both values and values_file for stack at the same time.');
+      throw new Error(
+        'Cannot define both values and values_file for stack at the same time.'
+      );
     }
 
     if (packDef.values_file) {
-      this.values = yaml.safeLoad(fs.readFileSync(join(configRepoPath, 'stacks', stackName, 'values', packDef.values_file), 'utf8'));
+      this.values = yaml.safeLoad(
+        fs.readFileSync(
+          join(configRepoPath, 'stacks', stackName, 'values', packDef.values_file),
+          'utf8'
+        )
+      );
     } else {
       this.values = packDef.values;
     }
 
     this.pack = packDef.pack;
     // Normalize path
-    if (!packDef.pack.includes('/') && !packDef.pack.includes(':') && !packDef.pack.includes('\\')) {
+    if (
+      !packDef.pack.includes('/') &&
+      !packDef.pack.includes(':') &&
+      !packDef.pack.includes('\\')
+    ) {
       // Pack refers to a pack inside the config repo /packs
       this.ref = join(configRepoPath, 'packs', packDef.pack);
     } else {
