@@ -1,0 +1,20 @@
+version: 2
+jobs:
+ build_publish:
+   machine: true
+   steps:
+     - checkout
+     - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+     - run: docker build -t swarmpack/swarm-sync:$CIRCLE_TAG .
+     - run: docker push swarmpack/swarm-sync:$CIRCLE_TAG
+
+workflows:
+  version: 2
+  build_and_release:
+    jobs:
+      - build_publish:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
