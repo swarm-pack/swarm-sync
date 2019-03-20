@@ -10,7 +10,10 @@ let state = {};
 
 if (stateStoragePath) {
   fs.ensureFileSync(stateStoragePath);
-  state = Object.assign(state, yaml.safeLoad(fs.readFileSync(path.resolve(stateStoragePath)).toString()));
+  state = Object.assign(
+    state,
+    yaml.safeLoad(fs.readFileSync(path.resolve(stateStoragePath)).toString())
+  );
   console.log(`Using ${stateStoragePath} to store swam state`);
 }
 
@@ -45,5 +48,5 @@ module.exports = {
   getDeployedStackPackCommit,
   getDeployedStackCommit,
   setDeployedStackCommit,
-  setDeployedStackPackCommit,
+  setDeployedStackPackCommit
 };

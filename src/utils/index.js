@@ -1,5 +1,3 @@
-
-
 /**
  * Async function to wait specific amount of `ms` then resolve a promise (no return value)
  */

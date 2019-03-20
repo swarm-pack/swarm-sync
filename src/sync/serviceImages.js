@@ -12,7 +12,10 @@ async function checkAndUpdateImages() {
   for (const service of managedServices) {
     if (service.pattern) {
       await await updateTagCache(service.current_image_repo, service.pattern);
-      const newestTag = getNewestTagFromCache(service.current_image_repo, service.pattern);
+      const newestTag = getNewestTagFromCache(
+        service.current_image_repo,
+        service.pattern
+      );
 
       if (newestTag && newestTag !== service.current_image_tag) {
         updateServiceImage(service.id, `${service.current_image_repo}:${newestTag}`);
@@ -22,5 +25,5 @@ async function checkAndUpdateImages() {
 }
 
 module.exports = {
-  checkAndUpdateImages,
+  checkAndUpdateImages
 };

@@ -24,10 +24,16 @@ function splitTypeAndPattern(tagPattern) {
 // Does this particular pattern sort semantically
 // i.e. doesn't care about created timestamp
 function isSemanticSort(tagPattern) {
-  const { type } = splitTypeAndPattern(tagPattern);
-  if (type === 'semver') return true;
-  return false;
+  return splitTypeAndPattern(tagPattern).type === 'semver';
 }
+
+const filters = {
+  // TODO Since semver will (probably?) not care about created timestamp
+  // we should be able to filter down to the latest/highest tag sematically?
+  semver: pattern => tag => semver.satisfies(tag.tag || tag, pattern),
+  glob: pattern => tag => minimatch(tag.tag || tag, pattern),
+  literal: pattern => tag => (tag.tag || tag) === pattern
+};
 
 /**
  * Get filter function for a specified tag_pattern, e.g. 'semver:v1.0.*' or 'glob:*'
@@ -35,32 +41,7 @@ function isSemanticSort(tagPattern) {
  * */
 function getFilter(tagPattern) {
   const { type, pattern } = splitTypeAndPattern(tagPattern);
-
-  // TODO Since semver will (probably?) not care about created timestamp
-  // we should be able to filter down to the latest/highest tag sematically?
-  if (type === 'semver') {
-    return (tag) => {
-      const t = semver.coerce(tag.tag ? tag.tag : tag);
-
-      // Value couldn't be coerced into semver
-      if (!t) return false;
-
-      return semver.satisfies(t, pattern);
-    };
-  }
-
-  if (type === 'glob') {
-    return tag => minimatch(tag.tag ? tag.tag : tag, pattern);
-  }
-
-  if (type === 'literal') {
-    return (tag) => {
-      const t = tag.tag ? tag.tag : tag;
-      return t === pattern;
-    };
-  }
-
-  return null;
+  return filters[type] ? filters[type](pattern) : false;
 }
 
 // TODO - some patterns may require different type of sort
@@ -68,16 +49,13 @@ function getFilter(tagPattern) {
 function getSort(tagPattern) {
   const { type } = splitTypeAndPattern(tagPattern);
 
-  if (type === 'semver') {
-    return (a, b) => compareVersions(a.tag, b.tag);
-  }
-
-  // Default (for glob, literal)
-  return (a, b) => a.created - b.created;
+  return type === 'semver'
+    ? (a, b) => compareVersions(a.tag, b.tag)
+    : (a, b) => a.created - b.created; // Default (for glob, literal)
 }
 
 module.exports = {
   getFilter,
   getSort,
-  isSemanticSort,
+  isSemanticSort
 };

@@ -11,16 +11,27 @@ async function checkAndDeployRepo() {
     for (const changedStack of changedStacks) {
       for (const pack of changedStack.packs) {
         const values = await pack.getPreparedValues();
-        console.log(`Running equivalent to: swarm-pack deploy ${pack.ref} ${changedStack.stack.name}`);
+        console.log(
+          `Running equivalent to: swarm-pack deploy ${pack.ref} ${
+            changedStack.stack.name
+          }`
+        );
         await swarmpack.compileAndDeploy({
           stack: changedStack.stack.name,
           packRef: pack.ref,
-          values,
+          values
         });
 
-        setDeployedStackPackCommit(changedStack.stack.name, pack.pack, await pack.getLastCommit());
+        setDeployedStackPackCommit(
+          changedStack.stack.name,
+          pack.pack,
+          await pack.getLastCommit()
+        );
       }
-      setDeployedStackCommit(changedStack.stack.name, await changedStack.stack.getLastCommit());
+      setDeployedStackCommit(
+        changedStack.stack.name,
+        await changedStack.stack.getLastCommit()
+      );
     }
   } else {
     console.log('No changes in config repository to deploy');
@@ -28,5 +39,5 @@ async function checkAndDeployRepo() {
 }
 
 module.exports = {
-  checkAndDeployRepo,
+  checkAndDeployRepo
 };

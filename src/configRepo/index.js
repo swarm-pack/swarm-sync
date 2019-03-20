@@ -42,11 +42,19 @@ async function checkForUpdates() {
   const targetStacks = stackDirs.filter(s => s.includes(config.stacks));
   console.log(`Target stacks: ${targetStacks.join(',')}`);
 
-  const stacks = targetStacks.map(stackName => new Stack({
-    name: stackName,
-    stackDef: yaml.safeLoad(fs.readFileSync(path.resolve(repoPath, 'stacks', stackName, 'stack.yml'), 'utf8')),
-    configRepoPath: repoPath,
-  }));
+  const stacks = targetStacks.map(
+    stackName =>
+      new Stack({
+        name: stackName,
+        stackDef: yaml.safeLoad(
+          fs.readFileSync(
+            path.resolve(repoPath, 'stacks', stackName, 'stack.yml'),
+            'utf8'
+          )
+        ),
+        configRepoPath: repoPath
+      })
+  );
 
   const changedStacks = [];
 
@@ -55,7 +63,7 @@ async function checkForUpdates() {
     if (changedStackPacks.length) {
       changedStacks.push({
         stack,
-        packs: changedStackPacks,
+        packs: changedStackPacks
       });
     }
   }
@@ -63,7 +71,6 @@ async function checkForUpdates() {
   return changedStacks;
 }
 
-
 module.exports = {
-  checkForUpdates,
+  checkForUpdates
 };
