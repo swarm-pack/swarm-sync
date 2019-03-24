@@ -14,7 +14,7 @@ const repo = git(repoPath);
 async function gitCryptUnlock() {
   return new Promise((resolve, reject) => {
     sh.cd(repoPath);
-    sh.exec(`git-crypt unlock ${config['git-crypt'].keyFile}`, (code, stdout, stderr) => {
+    sh.exec(`git-crypt unlock ${config.git_crypt.keyFile}`, (code, stdout, stderr) => {
       if (code === 0) {
         resolve();
       } else {
@@ -33,7 +33,7 @@ async function checkForUpdates() {
     await repo.clone(config.git.url, repoPath);
   }
 
-  if (config.gitCrypt && config['git-crypt'].keyFile) {
+  if (config.gitCrypt && config.git_crypt.keyFile) {
     await gitCryptUnlock();
   }
 

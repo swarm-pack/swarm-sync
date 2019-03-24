@@ -17,7 +17,7 @@ swarm-sync:
     branch: master
 
   # Swarm-sync can run git-crypt to decrypt your repo with a symmetric key
-  #gitCrypt:
+  #git_crypt:
   #  keyFile: /run/secrets/git-crypt-key
 
   # Common config with swarm-pack
