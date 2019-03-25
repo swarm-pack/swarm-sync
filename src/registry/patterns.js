@@ -29,10 +29,10 @@ function isSemanticSort(tagPattern) {
 
 const filters = {
   semver: pattern => tag => {
-    const t = semver.coerce(tag.tag || tag);
+    const t = semver.clean(tag.tag || tag);
     // If cannot be coerced to a version, filter out
     // If it can, test if it satisfies the pattern
-    return t ? semver.satisfies(t, pattern) : false;
+    return t !== null ? semver.satisfies(t, pattern) : false;
   },
   glob: pattern => tag => minimatch(tag.tag || tag, pattern),
   literal: pattern => tag => (tag.tag || tag) === pattern
