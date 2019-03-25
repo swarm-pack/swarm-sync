@@ -11,4 +11,4 @@ chmod 700 /root/.ssh/id_rsa
 fi
 
 echo "START THE APP..."
-node --experimental-modules src/index.mjs "$@"
+node src/index.js "$@"
