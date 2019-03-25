@@ -28,6 +28,7 @@ RUN curl -L https://github.com/AGWA/git-crypt/archive/debian/0.6.0.tar.gz | tar 
     mkdir -p /root/.ssh
 
 COPY . .
+COPY known_hosts /root/.ssh/known_hosts
 
 RUN yarn install
 
