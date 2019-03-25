@@ -28,9 +28,12 @@ function isSemanticSort(tagPattern) {
 }
 
 const filters = {
-  // TODO Since semver will (probably?) not care about created timestamp
-  // we should be able to filter down to the latest/highest tag sematically?
-  semver: pattern => tag => semver.satisfies(tag.tag || tag, pattern),
+  semver: pattern => tag => {
+    const t = semver.coerce(tag.tag || tag);
+    // If cannot be coerced to a version, filter out
+    // If it can, test if it satisfies the pattern
+    return t ? semver.satisfies(t, pattern) : false;
+  },
   glob: pattern => tag => minimatch(tag.tag || tag, pattern),
   literal: pattern => tag => (tag.tag || tag) === pattern
 };
