@@ -33,7 +33,7 @@ async function checkForUpdates() {
     await repo.clone(config.git.url, repoPath);
   }
 
-  if (config.gitCrypt && config.git_crypt.keyFile) {
+  if (config.git_crypt && config.git_crypt.keyFile) {
     await gitCryptUnlock();
   }
 
