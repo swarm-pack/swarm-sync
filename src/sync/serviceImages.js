@@ -11,7 +11,7 @@ async function checkAndUpdateImages() {
 
   for (const service of managedServices) {
     if (service.pattern) {
-      await await updateTagCache(service.current_image_repo, service.pattern);
+      await updateTagCache(service.current_image_repo, service.pattern);
       const newestTag = getNewestTagFromCache(
         service.current_image_repo,
         service.pattern
