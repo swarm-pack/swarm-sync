@@ -11,4 +11,4 @@ chmod 600 /root/.ssh/id_rsa
 fi
 
 echo "START THE APP..."
-node src/index.js "$@"
+exec node src/index.js "$@"
