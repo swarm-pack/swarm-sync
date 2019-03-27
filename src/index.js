@@ -19,17 +19,17 @@ nodeCleanup((exitCode, signal) => {
 });
 
 async function startUpdates() {
-  if (exit) {
-    console.log('Operations complete, exiting');
-    process.exit(0);
-  }
-  active = true;
   try {
+    active = true;
     await checkAndDeployRepo();
     await checkAndUpdateImages();
+    active = false;
+    if (exit) {
+      console.log('Operations complete, exiting');
+      process.exit(0);
+    }
     if (!config.once_only) {
       console.log(`Waiting ${config.updateInterval / 1000} seconds for next scan.`);
-      active = false;
       setTimeout(startUpdates, config.updateInterval);
     } else {
       console.log('Deploying once only, due to configuration');
