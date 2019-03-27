@@ -1,15 +1,27 @@
-#! /usr/bin/env node --experimental-modules
+#! /usr/bin/env node
 const nodeCleanup = require('node-cleanup');
 const config = require('./config');
 const { checkAndDeployRepo } = require('./sync/configRepo');
 const { checkAndUpdateImages } = require('./sync/serviceImages');
 
+let exit = false;
+
 nodeCleanup((exitCode, signal) => {
-  console.log('Clean up & exit...');
-  process.kill(process.pid, signal);
+  // Received signal to terminate, likely Docker updating the service
+  if (signal === 'SIGTERM') {
+    console.log('Received SIGTERM, will wait for operations to complete before exit...');
+    exit = true;
+    return false;
+  }
+
+  return true;
 });
 
 async function startUpdates() {
+  if (exit) {
+    console.log('Operations complete, exiting');
+    process.exit(0);
+  }
   try {
     await checkAndDeployRepo();
     await checkAndUpdateImages();
