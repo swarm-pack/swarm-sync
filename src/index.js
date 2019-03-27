@@ -4,16 +4,16 @@ const config = require('./config');
 const { checkAndDeployRepo } = require('./sync/configRepo');
 const { checkAndUpdateImages } = require('./sync/serviceImages');
 
-let exit = false;
+let exit = false; // exit flag for graceful exit
+let active = true; // Set to false when 'waiting' between updates, to indicate we can safely exit
 
 nodeCleanup((exitCode, signal) => {
   // Received signal to terminate, likely Docker updating the service
-  if (signal === 'SIGTERM') {
+  if (signal === 'SIGTERM' && active) {
     console.log('Received SIGTERM, will wait for operations to complete before exit...');
     exit = true;
     return false;
   }
-
   return true;
 });
 
@@ -22,11 +22,13 @@ async function startUpdates() {
     console.log('Operations complete, exiting');
     process.exit(0);
   }
+  active = true;
   try {
     await checkAndDeployRepo();
     await checkAndUpdateImages();
     if (!config.once_only) {
       console.log(`Waiting ${config.updateInterval / 1000} seconds for next scan.`);
+      active = false;
       setTimeout(startUpdates, config.updateInterval);
     } else {
       console.log('Deploying once only, due to configuration');
