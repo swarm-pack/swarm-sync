@@ -9,8 +9,9 @@ let active = true; // Set to false when 'waiting' between updates, to indicate w
 
 nodeCleanup((exitCode, signal) => {
   // Received signal to terminate, likely Docker updating the service
+  console.log(`Received signal ${signal} (exitCode ${exitCode})`);
   if (signal === 'SIGTERM' && active) {
-    console.log('Received SIGTERM, will wait for operations to complete before exit...');
+    console.log('Waiting for operations to complete before exit...');
     exit = true;
     return false;
   }
