@@ -119,6 +119,26 @@ With this configuration, the stack defined in `stacks/nonprod/stack.yml` will be
 
 Config file should be mounted at /etc/swarm-sync.yml and Docker Config or Docker Secret is recommended for this.
 
+### Registry authentication
+
+If watching for image updates in a private docker registry, you will need to define authentication credentials.
+
+This is done by mounting a docker secret matching the hostname of the registry at `/run/secrets/registries/[hostname]`.
+
+The secret should be a yml file in the following format:
+
+```
+username: xxx
+password: xxx
+```
+
+For example, to authenticate docker.example.com, we mount the following secret to `/run/secrets/registries/docker.example.com`:
+
+```
+username: example
+password: changeme
+```
+
 ## Development
 
 Node v11.9.0

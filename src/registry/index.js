@@ -16,6 +16,7 @@ async function updateTagCache(repo, pattern) {
   // TODO - we might need to sanitize "repo" for cachekey as it probably contains illegal chars
   const cacheKey = getCacheKey(repo);
   const tagCache = cache.get(cacheKey) || [];
+
   const client = new RegistryClient(repo);
   let tagList = await client.listTags();
   const fetchedAt = new Date();

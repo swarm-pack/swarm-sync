@@ -23,6 +23,8 @@ swarm-sync:
   # Common config with swarm-pack
   docker:
     socketPath: /var/run/docker.sock
+
+  # swarm-pack repos
   repositories:
     - name: official
       url: https://github.com/swarm-pack/repository
