@@ -7,7 +7,7 @@ const registrySecretsPath = '/run/secrets/registries/';
 
 /** Registry Client for a particular image reference (promisified docker-registry-client) * */
 class RegistryClient {
-  constructor({ repo }) {
+  constructor(repo) {
     this.repo = repo;
     const repoAndRef = drc.parseRepoAndRef(repo);
     const clientConfig = { name: repo };
