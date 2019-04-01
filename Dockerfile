@@ -21,19 +21,17 @@ RUN apk --update --no-cache add \
    make \
    openssh \
    openssl \
-   openssl-dev
+   openssl-dev && \
+  curl -L https://github.com/AGWA/git-crypt/archive/debian/0.6.0.tar.gz | tar zxv -C /var/tmp && \
+  cd /var/tmp/git-crypt-debian && make && make install PREFIX=/usr/local && rm -rf /var/tmp/git-crypt-debian && \
+  mkdir -p /root/.ssh
 
-RUN curl -L https://github.com/AGWA/git-crypt/archive/debian/0.6.0.tar.gz | tar zxv -C /var/tmp && \
-    cd /var/tmp/git-crypt-debian && make && make install PREFIX=/usr/local && rm -rf /var/tmp/git-crypt-debian && \
-    mkdir -p /root/.ssh
-
-COPY . .
 COPY known_hosts /root/.ssh/known_hosts
+COPY . .
 
-RUN yarn install
-
-RUN ["chmod", "+x", "./start.sh"]
-RUN ["chmod", "+x", "./env_secrets_expand.sh"]
+RUN yarn install && \
+    chmod +x ./start.sh && \
+    chmod +x ./env_secrets_expand.sh
 
 # expose port
 EXPOSE 80

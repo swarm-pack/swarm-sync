@@ -1,0 +1,5 @@
+.git
+.drone.yml
+.editorconfig
+.circleci
+node_modules
