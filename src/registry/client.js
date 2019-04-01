@@ -14,6 +14,7 @@ class RegistryClient {
 
     // Look for matching secrets
     if (fs.existsSync(path.join(registrySecretsPath, repoAndRef.index.name))) {
+      console.log(`Found registry credentials for ${repoAndRef.index.name}`);
       const regAuth = yaml.safeLoad(
         fs.readFileSync(path.join(registrySecretsPath, repoAndRef.index.name), 'utf8')
       );

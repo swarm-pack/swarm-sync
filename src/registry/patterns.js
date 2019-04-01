@@ -13,10 +13,9 @@ const semver = require('semver');
  */
 
 function splitTypeAndPattern(tagPattern) {
-  let [type, pattern] = tagPattern.split(':');
+  const [type, pattern] = tagPattern.split(':');
   if (!pattern) {
-    pattern = type;
-    type = 'literal';
+    throw Error(`tag_pattern '${tagPattern}' looks wrong`);
   }
   return { type, pattern };
 }
