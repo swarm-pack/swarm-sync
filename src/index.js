@@ -15,6 +15,9 @@ nodeCleanup((exitCode, signal) => {
     exit = true;
     return false;
   }
+  // Somethimes process.exit elsewhere gets stuck here and never ends
+  // For now, adding this kill to be sure
+  process.kill(process.pid, 'SIGKILL');
   return true;
 });
 
