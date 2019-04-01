@@ -2,6 +2,7 @@ const drc = require('docker-registry-client');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const path = require('path');
+const sh = require('shelljs');
 
 const registrySecretsPath = '/run/secrets/registries/';
 
@@ -10,21 +11,30 @@ class RegistryClient {
   constructor(repo) {
     this.repo = repo;
     const repoAndRef = drc.parseRepoAndRef(repo);
+    const registry = repoAndRef.index.name;
     const clientConfig = { name: repo };
 
     // Look for matching secrets
-    if (fs.existsSync(path.join(registrySecretsPath, repoAndRef.index.name))) {
-      console.log(`Found registry credentials for ${repoAndRef.index.name}`);
-      const regAuth = yaml.safeLoad(
-        fs.readFileSync(path.join(registrySecretsPath, repoAndRef.index.name), 'utf8')
+    if (fs.existsSync(path.join(registrySecretsPath, registry))) {
+      console.log(`Found registry credentials for ${registry}`);
+      const auth = yaml.safeLoad(
+        fs.readFileSync(path.join(registrySecretsPath, registry), 'utf8')
       );
-      if (regAuth && regAuth.username && regAuth.password) {
-        clientConfig.username = regAuth.username;
-        clientConfig.password = regAuth.password;
+      if (auth && auth.username && auth.password) {
+        // Use `docker login` to test credentials,
+        // And to create entry in ~/.docker/config.json which will be used by SP
+        if (
+          sh.exec(`docker login ${registry} -u ${auth.username} -p ${auth.password}`, {
+            silent: true
+          }).code === 0
+        ) {
+          clientConfig.username = auth.username;
+          clientConfig.password = auth.password;
+        } else {
+          console.log(`Could not login to ${registry} with credentials`);
+        }
       } else {
-        console.log(
-          `Invalid format for ${path.join(registrySecretsPath, repoAndRef.index.name)}`
-        );
+        console.log(`Invalid format for ${path.join(registrySecretsPath, registry)}`);
       }
     }
 
