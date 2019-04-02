@@ -2,6 +2,7 @@ const piteration = require('p-iteration');
 const git = require('../utils/git');
 const Pack = require('./pack');
 const { getDeployedStackPackCommit, getDeployedStackCommit } = require('../state');
+const config = require('../config');
 
 const { filter } = piteration;
 
@@ -10,8 +11,14 @@ class Stack {
     this.stackDef = stackDef;
     this.name = name;
     this.git = git(configRepoPath);
+    let packs = { ...stackDef.packs };
+    // If bootstrap, we try to look for only swarm-sync pack and exclude others
+    if (config.bootstrap) {
+      packs = packs.filter(packDef => packDef.includes('swarm-sync'));
+    }
+
     // Instantiate packs
-    this.packs = stackDef.packs.map(
+    this.packs = packs.map(
       packDef => new Pack({ packDef, stackName: this.name, configRepoPath })
     );
   }

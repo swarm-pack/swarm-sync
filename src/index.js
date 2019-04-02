@@ -31,7 +31,7 @@ async function startUpdates() {
       console.log('Operations complete, exiting');
       process.exit(0);
     }
-    if (!config.once_only) {
+    if (!config.bootstrap) {
       console.log(`Waiting ${config.updateInterval / 1000} seconds for next scan.`);
       setTimeout(startUpdates, config.updateInterval);
     } else {
