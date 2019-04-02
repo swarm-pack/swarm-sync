@@ -14,7 +14,9 @@ class Stack {
     let packs = [...stackDef.packs];
     // If bootstrap, we try to look for only swarm-sync pack and exclude others
     if (config.bootstrap) {
-      packs = packs.filter(packDef => packDef.includes('swarm-sync'));
+      packs = packs.filter(packDef => packDef.pack.includes('swarm-sync'));
+      console.log('Bootstrap mode - only running the following packs:');
+      console.log(packs);
     }
 
     // Instantiate packs

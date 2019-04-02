@@ -9,9 +9,7 @@ const config = yaml.safeLoad(fs.readFileSync(configFilePath, 'utf8'))['swarm-syn
 
 // CLI options override
 // --once - run update/deploy only one time, do not start as daemon
-if (process.argv.includes('--once')) {
-  config.once_only = true;
-}
+config.bootstrap = process.argv.includes('--bootstrap');
 
 // Validations, defaults, transformations etc
 if (config.docker.socketPath && config.docker.host) {
