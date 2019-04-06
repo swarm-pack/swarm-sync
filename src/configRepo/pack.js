@@ -25,7 +25,7 @@ class Pack {
         )
       );
     } else {
-      this.values = packDef.values;
+      this.values = packDef.values || {};
     }
 
     this.pack = packDef.pack;
