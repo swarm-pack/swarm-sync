@@ -1,6 +1,10 @@
 const config = require('../config');
 const { checkForUpdates } = require('../configRepo');
-const { setDeployedStackCommit, setDeployedStackPackCommit } = require('../state');
+const {
+  setDeployedStackCommit,
+  setDeployedStackPackCommit,
+  markStackPackForRetry
+} = require('../state');
 const swarmpack = require('swarm-pack')({ config: config.swarmpack });
 
 async function checkAndDeployRepo() {
@@ -10,23 +14,35 @@ async function checkAndDeployRepo() {
     console.log(`Changes found, redeploying ${changedStacks.length} stacks`);
     for (const changedStack of changedStacks) {
       for (const pack of changedStack.packs) {
-        const values = await pack.getPreparedValues();
-        console.log(
-          `Running equivalent to: swarm-pack deploy ${pack.ref} ${
-            changedStack.stack.name
-          }`
-        );
-        await swarmpack.compileAndDeploy({
-          stack: changedStack.stack.name,
-          packRef: pack.ref,
-          values
-        });
+        try {
+          const values = await pack.getPreparedValues();
+          console.log(
+            `Running equivalent to: swarm-pack deploy ${pack.ref} ${
+              changedStack.stack.name
+            }`
+          );
 
-        setDeployedStackPackCommit(
-          changedStack.stack.name,
-          pack.pack,
-          await pack.getLastCommit()
-        );
+          await swarmpack.compileAndDeploy({
+            stack: changedStack.stack.name,
+            packRef: pack.ref,
+            values
+          });
+
+          setDeployedStackPackCommit(
+            changedStack.stack.name,
+            pack.pack,
+            await pack.getLastCommit()
+          );
+        } catch (error) {
+          console.log(
+            `Failed deploying ${
+              pack.ref
+            }. Will not mark as updated and will retry next cycle.`
+          );
+
+          // Mark pack as needing retry
+          markStackPackForRetry(changedStack.stack.name, pack.pack);
+        }
       }
       setDeployedStackCommit(
         changedStack.stack.name,

@@ -40,13 +40,27 @@ function setDeployedStackCommit(stack, commit) {
 
 function setDeployedStackPackCommit(stack, pack, commit) {
   state[stack] = state[stack] || { commit: '', packs: {} };
-  state[stack].packs[pack] = { commit };
+  state[stack].packs[pack] = { commit, failures: 0 };
   _saveState();
+}
+
+function markStackPackForRetry(stack, pack) {
+  state[stack] = state[stack] || { commit: '', packs: {} };
+  state[stack].packs[pack] = state[stack].packs[pack] || { commit: '', failures: 0 };
+  state[stack].packs[pack].failures += 1;
+  _saveState();
+}
+
+function needsRetry(stack, pack) {
+  // TODO - we could put a limit to the retry count here...
+  return ((((state[stack] || {}).packs || {})[pack] || {}).failures || 0) > 0;
 }
 
 module.exports = {
   getDeployedStackPackCommit,
   getDeployedStackCommit,
   setDeployedStackCommit,
-  setDeployedStackPackCommit
+  setDeployedStackPackCommit,
+  markStackPackForRetry,
+  needsRetry
 };

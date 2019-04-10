@@ -1,7 +1,11 @@
 const piteration = require('p-iteration');
 const git = require('../utils/git');
 const Pack = require('./pack');
-const { getDeployedStackPackCommit, getDeployedStackCommit } = require('../state');
+const {
+  getDeployedStackPackCommit,
+  getDeployedStackCommit,
+  needsRetry
+} = require('../state');
 const config = require('../config');
 
 const { filter } = piteration;
@@ -42,7 +46,9 @@ class Stack {
     return filter(
       this.packs,
       async pack =>
-        (await pack.getLastCommit()) !== getDeployedStackPackCommit(this.name, pack.pack)
+        (await pack.getLastCommit()) !==
+          getDeployedStackPackCommit(this.name, pack.pack) ||
+        needsRetry(this.name, pack.pack)
     );
   }
 }
