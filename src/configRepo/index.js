@@ -39,7 +39,7 @@ async function checkForUpdates() {
 
   const stackDirs = await fs.readdir(path.resolve(repoPath, 'stacks'));
   // Stacks in target are defined in config.stacks, and have a corresponding stacks/[stack-name]/stack.yml in the repo
-  const targetStacks = stackDirs.filter(s => s.includes(config.stacks));
+  const targetStacks = stackDirs.filter(s => config.stacks.includes(s));
   console.log(`Target stacks: ${targetStacks.join(',')}`);
 
   const stacks = targetStacks.map(
