@@ -21,8 +21,6 @@ async function updateTagCache(repo, pattern) {
   let tagList = await client.listTags();
   const fetchedAt = new Date();
 
-  console.log(`Updating image tag cache for ${repo}...`);
-
   if (pattern) {
     tagList = tagList.filter(patterns.getFilter(pattern));
   }
@@ -63,5 +61,6 @@ function getNewestTagFromCache(repo, pattern) {
 
 module.exports = {
   updateTagCache,
-  getNewestTagFromCache
+  getNewestTagFromCache,
+  getCachedTags
 };

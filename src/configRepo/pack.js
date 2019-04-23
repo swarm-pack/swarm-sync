@@ -1,7 +1,8 @@
-const { join } = require('path');
+const { resolve, join } = require('path');
 const SwarmPack = require('swarm-pack');
 const yaml = require('js-yaml');
 const fs = require('fs-extra');
+const deepExtend = require('deep-extend');
 const { updateTagCache, getNewestTagFromCache } = require('../registry');
 const { findKeyInObject } = require('../utils');
 const config = require('../config');
@@ -11,21 +12,19 @@ const swarmpack = SwarmPack({ config: config.swarmpack });
 class Pack {
   constructor({ packDef, stackName, configRepoPath }) {
     this.packDef = packDef;
-    if (packDef.values && packDef.values_file) {
-      throw new Error(
-        'Cannot define both values and values_file for stack at the same time.'
-      );
-    }
+    this.values = {};
 
     if (packDef.values_file) {
       this.values = yaml.safeLoad(
         fs.readFileSync(
-          join(configRepoPath, 'stacks', stackName, 'values', packDef.values_file),
+          resolve(configRepoPath, 'stacks', stackName, packDef.values_file),
           'utf8'
         )
       );
-    } else {
-      this.values = packDef.values || {};
+    }
+
+    if (packDef.values) {
+      this.values = deepExtend({}, this.values, packDef.values);
     }
 
     this.pack = packDef.pack;

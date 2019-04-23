@@ -1,6 +1,6 @@
 {
   "name": "swarm-sync",
-  "version": "0.1.39",
+  "version": "0.1.40",
   "description": "GitOps for Docker Swarm",
   "main": "src/index.js",
   "repository": "git@bitbucket.org:1dayio/microservice-reservations.git",
@@ -23,6 +23,7 @@
     "commander": "^2.19.0",
     "compare-versions": "^3.4.0",
     "config": "^3.0.1",
+    "deep-extend": "^0.6.0",
     "docker-registry-client": "^3.3.0",
     "dockerode": "^2.5.8",
     "dotenv": "^6.0.0",
