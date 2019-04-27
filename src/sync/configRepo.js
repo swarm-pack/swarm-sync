@@ -1,8 +1,8 @@
 const config = require('../config');
 const { checkForUpdates } = require('../configRepo');
 const {
-  setDeployedStackCommit,
-  setDeployedStackPackCommit,
+  setDeployedStack,
+  setDeployedStackPack,
   markStackPackForRetry
 } = require('../state');
 const swarmpack = require('swarm-pack')({ config: config.swarmpack });
@@ -28,11 +28,12 @@ async function checkAndDeployRepo() {
             values
           });
 
-          setDeployedStackPackCommit(
-            changedStack.stack.name,
-            pack.pack,
-            await pack.getLastCommit()
-          );
+          setDeployedStackPack({
+            stack: changedStack.stack.name,
+            pack: pack.pack,
+            commit: await pack.getLastCommit(),
+            valuesHash: await pack.getValuesHash()
+          });
         } catch (error) {
           console.log(
             `Failed deploying ${
@@ -44,10 +45,10 @@ async function checkAndDeployRepo() {
           markStackPackForRetry(changedStack.stack.name, pack.pack);
         }
       }
-      setDeployedStackCommit(
-        changedStack.stack.name,
-        await changedStack.stack.getLastCommit()
-      );
+      setDeployedStack({
+        stack: changedStack.stack.name,
+        commit: await changedStack.stack.getLastCommit()
+      });
     }
   } else {
     console.log('No changes in config repository to deploy');

@@ -1,11 +1,7 @@
 const piteration = require('p-iteration');
 const git = require('../utils/git');
 const Pack = require('./pack');
-const {
-  getDeployedStackPackCommit,
-  getDeployedStackCommit,
-  needsRetry
-} = require('../state');
+const { getDeployedStackPack, getDeployedStack, needsRetry } = require('../state');
 const config = require('../config');
 
 const { filter } = piteration;
@@ -38,18 +34,24 @@ class Stack {
 
   async getChanges() {
     // If stack def changed, return all packs as changed
-    if (getDeployedStackCommit(this.name) !== (await this.getLastCommit())) {
+    if (getDeployedStack({ stack: this.name }).commit !== (await this.getLastCommit())) {
       return this.packs;
     }
 
     // If stack def didn't change, return a list of individual packs that changed (if any)
-    return filter(
-      this.packs,
-      async pack =>
-        (await pack.getLastCommit()) !==
-          getDeployedStackPackCommit(this.name, pack.pack) ||
+    return filter(this.packs, async pack => {
+      const deployedStackDetails = getDeployedStackPack({
+        stack: this.name,
+        pack: pack.pack
+      });
+
+      // TODO - This is getting clunky. Can refactor once we switch to sem versions instead of git commit hash
+      return (
+        (await pack.getLastCommit()) !== deployedStackDetails.commit ||
+        (await pack.getValuesHash()) !== deployedStackDetails.valuesHash ||
         needsRetry(this.name, pack.pack)
-    );
+      );
+    });
   }
 }
 

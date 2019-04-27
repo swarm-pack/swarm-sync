@@ -13,7 +13,7 @@ swarm-sync:
 
   # Git details for your Swarm Configuration Repository
   git:
-    url: https://github.com/swarm-pack/swarm-sync-example
+    url: https://github.com/kevb/swarm-sync-example
     branch: master
 
   # Swarm-sync can run git-crypt to decrypt your repo with a symmetric key

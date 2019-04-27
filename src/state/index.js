@@ -17,12 +17,12 @@ if (stateStoragePath) {
   console.log(`Using ${stateStoragePath} to store swam state`);
 }
 
-function getDeployedStackPackCommit(stack, pack) {
-  return (((state[stack] || {}).packs || {})[pack] || {}).commit || '';
+function getDeployedStackPack({ stack, pack }) {
+  return ((state[stack] || {}).packs || {})[pack] || {};
 }
 
-function getDeployedStackCommit(stack) {
-  return (state[stack] || {}).commit || '';
+function getDeployedStack({ stack }) {
+  return state[stack] || {};
 }
 
 function _saveState() {
@@ -32,35 +32,35 @@ function _saveState() {
   }
 }
 
-function setDeployedStackCommit(stack, commit) {
+function setDeployedStack({ stack, commit }) {
   state[stack] = state[stack] || { commit: '', packs: {} };
   state[stack].commit = commit;
   _saveState();
 }
 
-function setDeployedStackPackCommit(stack, pack, commit) {
+function setDeployedStackPack({ stack, pack, commit, valuesHash }) {
   state[stack] = state[stack] || { commit: '', packs: {} };
-  state[stack].packs[pack] = { commit, failures: 0 };
+  state[stack].packs[pack] = { commit, valuesHash, failures: 0 };
   _saveState();
 }
 
-function markStackPackForRetry(stack, pack) {
+function markStackPackForRetry({ stack, pack }) {
   state[stack] = state[stack] || { commit: '', packs: {} };
   state[stack].packs[pack] = state[stack].packs[pack] || { commit: '', failures: 0 };
   state[stack].packs[pack].failures += 1;
   _saveState();
 }
 
-function needsRetry(stack, pack) {
+function needsRetry({ stack, pack }) {
   // TODO - we could put a limit to the retry count here...
   return ((((state[stack] || {}).packs || {})[pack] || {}).failures || 0) > 0;
 }
 
 module.exports = {
-  getDeployedStackPackCommit,
-  getDeployedStackCommit,
-  setDeployedStackCommit,
-  setDeployedStackPackCommit,
+  getDeployedStackPack,
+  getDeployedStack,
+  setDeployedStack,
+  setDeployedStackPack,
   markStackPackForRetry,
   needsRetry
 };

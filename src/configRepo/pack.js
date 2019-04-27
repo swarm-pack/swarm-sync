@@ -3,6 +3,7 @@ const SwarmPack = require('swarm-pack');
 const yaml = require('js-yaml');
 const fs = require('fs-extra');
 const deepExtend = require('deep-extend');
+const oHash = require('object-hash');
 const { updateTagCache, getNewestTagFromCache } = require('../registry');
 const { findKeyInObject } = require('../utils');
 const config = require('../config');
@@ -71,6 +72,11 @@ class Pack {
       }
     }
     return this.values;
+  }
+
+  async getValuesHash() {
+    const values = await this.getPreparedValues();
+    return oHash(values);
   }
 }
 
