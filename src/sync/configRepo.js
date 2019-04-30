@@ -35,8 +35,9 @@ async function checkAndDeployRepo() {
             valuesHash: await pack.getValuesHash()
           });
         } catch (error) {
+          console.log(error);
           console.log(
-            `Failed deploying ${
+            `\nFailed deploying ${
               pack.ref
             }. Will not mark as updated and will retry next cycle.`
           );
