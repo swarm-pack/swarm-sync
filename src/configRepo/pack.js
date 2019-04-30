@@ -75,8 +75,7 @@ class Pack {
   }
 
   async getValuesHash() {
-    const values = await this.getPreparedValues();
-    return oHash(values);
+    return oHash(await this.getPreparedValues());
   }
 }
 

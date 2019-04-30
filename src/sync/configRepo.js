@@ -1,3 +1,4 @@
+const log = require('../utils/logger');
 const config = require('../config');
 const { checkForUpdates } = require('../configRepo');
 const {
@@ -8,15 +9,15 @@ const {
 const swarmpack = require('swarm-pack')({ config: config.swarmpack });
 
 async function checkAndDeployRepo() {
-  console.log('Polling git repository for changes');
+  log.info('Polling git repository for changes');
   const changedStacks = await checkForUpdates();
   if (changedStacks.length) {
-    console.log(`Changes found, redeploying ${changedStacks.length} stacks`);
+    log.info(`Changes found, redeploying ${changedStacks.length} stacks`);
     for (const changedStack of changedStacks) {
       for (const pack of changedStack.packs) {
         try {
           const values = await pack.getPreparedValues();
-          console.log(
+          log.debug(
             `Running equivalent to: swarm-pack deploy ${pack.ref} ${
               changedStack.stack.name
             }`
@@ -35,15 +36,15 @@ async function checkAndDeployRepo() {
             valuesHash: await pack.getValuesHash()
           });
         } catch (error) {
-          console.log(error);
-          console.log(
+          log.error(error);
+          log.error(
             `\nFailed deploying ${
               pack.ref
             }. Will not mark as updated and will retry next cycle.`
           );
 
           // Mark pack as needing retry
-          markStackPackForRetry(changedStack.stack.name, pack.pack);
+          markStackPackForRetry({ stack: changedStack.stack.name, pack: pack.pack });
         }
       }
       setDeployedStack({
@@ -52,7 +53,7 @@ async function checkAndDeployRepo() {
       });
     }
   } else {
-    console.log('No changes in config repository to deploy');
+    log.info('No changes in config repository to deploy');
   }
 }
 

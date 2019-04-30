@@ -1,13 +1,14 @@
+const log = require('../utils/logger');
 const { getManagedServices, updateServiceImage } = require('../docker');
 const { updateTagCache, getNewestTagFromCache } = require('../registry');
 
 async function checkAndUpdateImages() {
   const managedServices = await getManagedServices();
   if (managedServices.length === 0) {
-    console.log('No swarm-sync managed services found in swarm');
+    log.info('No swarm-sync managed services found in swarm');
     return;
   }
-  console.log(`Found ${managedServices.length} swarm-sync managed services`);
+  log.info(`Found ${managedServices.length} swarm-sync managed services`);
 
   for (const service of managedServices) {
     if (service.pattern) {

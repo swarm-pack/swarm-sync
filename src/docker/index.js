@@ -1,5 +1,6 @@
 const utf8 = require('utf8');
 const Docker = require('dockerode');
+const log = require('../utils/logger');
 const config = require('../config');
 
 const client = new Docker({ socketPath: config.docker.socketPath });
@@ -38,7 +39,7 @@ async function updateServiceImage(id, image) {
   update.version = parseInt(serviceData.Version.Index, 10);
   update.TaskTemplate.ContainerSpec.Image = image;
   update.TaskTemplate.ForceUpdate = 1;
-  console.log(`Updating service ${id} to image ${image}`);
+  log.info(`Updating service ${id} to image ${image}`);
   return client.getService(id).update(update);
 }
 

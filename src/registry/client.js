@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const path = require('path');
 const sh = require('shelljs');
+const log = require('../utils/logger');
 
 const registrySecretsPath = '/run/secrets/registries/';
 
@@ -16,7 +17,7 @@ class RegistryClient {
 
     // Look for matching secrets
     if (fs.existsSync(path.join(registrySecretsPath, registry))) {
-      console.log(`Found registry credentials for ${registry}`);
+      log.debug(`Found registry credentials for ${registry}`);
       const auth = yaml.safeLoad(
         fs.readFileSync(path.join(registrySecretsPath, registry), 'utf8')
       );
@@ -31,10 +32,10 @@ class RegistryClient {
           clientConfig.username = auth.username;
           clientConfig.password = auth.password;
         } else {
-          console.log(`Could not login to ${registry} with credentials`);
+          log.warn(`Could not login to ${registry} with credentials`);
         }
       } else {
-        console.log(`Invalid format for ${path.join(registrySecretsPath, registry)}`);
+        log.warn(`Invalid format for ${path.join(registrySecretsPath, registry)}`);
       }
     }
 

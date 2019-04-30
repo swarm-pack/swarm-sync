@@ -35,6 +35,8 @@
     "helmet": "^3.12.1",
     "js-yaml": "^3.13.0",
     "lodash": "^4.17.10",
+    "lodash-id": "^0.14.0",
+    "lowdb": "^1.0.0",
     "minimatch": "^3.0.4",
     "mongoose": "^5.1.5",
     "node-cache": "^4.2.0",

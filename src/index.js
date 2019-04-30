@@ -1,5 +1,10 @@
 #! /usr/bin/env node
+
 const nodeCleanup = require('node-cleanup');
+const log = require('./utils/logger');
+// Init logging
+log.setLevel(process.env.SWARM_SYNC_LOGLEVEL || 2);
+
 const config = require('./config');
 const { checkAndDeployRepo } = require('./sync/configRepo');
 const { checkAndUpdateImages } = require('./sync/serviceImages');
@@ -9,9 +14,9 @@ let active = true; // Set to false when 'waiting' between updates, to indicate w
 
 nodeCleanup((exitCode, signal) => {
   // Received signal to terminate, likely Docker updating the service
-  console.log(`Received signal ${signal} (exitCode ${exitCode})`);
+  log.warn(`Received signal ${signal} (exitCode ${exitCode})`);
   if (signal === 'SIGTERM' && active) {
-    console.log('Waiting for operations to complete before exit...');
+    log.warn('Waiting for operations to complete before exit...');
     exit = true;
     return false;
   }
@@ -28,18 +33,21 @@ async function startUpdates() {
     await checkAndUpdateImages();
     active = false;
     if (exit) {
-      console.log('Operations complete, exiting');
+      log.warn('Operations complete, exiting');
       process.exit(0);
     }
     if (!config.bootstrap) {
-      console.log(`Waiting ${config.updateInterval / 1000} seconds for next scan.`);
+      log.info(
+        `\n -- Waiting ${config.updateInterval / 1000} seconds for next scan. -- \n`
+      );
       setTimeout(startUpdates, config.updateInterval);
     } else {
-      console.log('Deploying once only, due to configuration');
+      log.info('Bootstrap complete');
       process.exit(0);
     }
   } catch (error) {
-    console.log(error);
+    log.error('Fatal unhandled exception');
+    log.error(error);
     process.exit(1);
   }
 }

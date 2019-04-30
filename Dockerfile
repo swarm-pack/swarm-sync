@@ -8,6 +8,9 @@ ENV SWARM_SYNC_STATE_FILE /run/swarm-sync/state
 # Private SSH key used to generate /root/.ssh/id_rsa for private git repos
 ENV SSH_PRIVATE_KEY false
 
+# Log level - trace: 0, debug: 1, info: 2, warn: 3, error: 4, silent: 5
+ENV SWARM_SYNC_LOGLEVEL 2
+
 WORKDIR /www
 
 RUN apk --update --no-cache add \
