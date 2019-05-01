@@ -19,7 +19,10 @@ async function checkAndUpdateImages() {
       );
 
       if (newestTag && newestTag !== service.current_image_tag) {
-        updateServiceImage(service.id, `${service.current_image_repo}:${newestTag}`);
+        await updateServiceImage(
+          service.id,
+          `${service.current_image_repo}:${newestTag}`
+        );
       }
     }
   }

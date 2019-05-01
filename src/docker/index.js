@@ -40,7 +40,7 @@ async function updateServiceImage(id, image) {
   update.TaskTemplate.ContainerSpec.Image = image;
   update.TaskTemplate.ForceUpdate = 1;
   log.info(`Updating service ${id} to image ${image}`);
-  return client.getService(id).update(update);
+  await client.getService(id).update(update);
 }
 
 module.exports = {
