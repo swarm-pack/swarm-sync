@@ -30,7 +30,11 @@ async function startUpdates() {
   try {
     active = true;
     await checkAndDeployRepo();
-    await checkAndUpdateImages();
+
+    // OK to exit here if needed as images can be updated in next process
+    if (!exit) {
+      await checkAndUpdateImages();
+    }
     active = false;
     if (exit) {
       log.warn('Operations complete, exiting');
