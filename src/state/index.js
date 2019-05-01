@@ -1,59 +1,69 @@
-const fs = require('fs-extra');
-const path = require('path');
-const yaml = require('js-yaml');
-
-// TODO - probably will move away from file on volume approach eventually
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
+const Memory = require('lowdb/adapters/Memory');
+const log = require('../utils/logger');
 
 const stateStoragePath = process.env.SWARM_SYNC_STATE_FILE || false;
 
-let state = {};
-
+let adapter;
+const opts = { defaultValue: { stacks: {} } };
 if (stateStoragePath) {
-  fs.ensureFileSync(stateStoragePath);
-  state = Object.assign(
-    state,
-    yaml.safeLoad(fs.readFileSync(path.resolve(stateStoragePath)).toString())
-  );
-  console.log(`Using ${stateStoragePath} to store swam state`);
+  adapter = new FileSync(process.env.SWARM_SYNC_STATE_FILE, opts);
+} else {
+  adapter = new Memory(null, opts);
 }
 
-function getDeployedStackPack({ stack, pack }) {
-  return ((state[stack] || {}).packs || {})[pack] || {};
+const db = low(adapter);
+db.read();
+
+function _ensureStackInDB({ stack }) {
+  if (!db.has(`stacks.${stack}`).value()) {
+    db.set(`stacks.${stack}`, { commit: '', packs: {} }).write();
+  }
 }
 
-function getDeployedStack({ stack }) {
-  return state[stack] || {};
-}
-
-function _saveState() {
-  if (stateStoragePath) {
-    fs.ensureFileSync(stateStoragePath);
-    fs.writeFileSync(path.resolve(stateStoragePath), yaml.safeDump(state));
+function _ensureStackPackInDB({ stack, pack }) {
+  _ensureStackInDB({ stack });
+  if (!db.has(`stacks.${stack}.packs.${pack}`).value()) {
+    db.set(`stacks.${stack}.packs.${pack}`, {
+      commit: '',
+      valuesHash: '',
+      failures: 0
+    }).write();
   }
 }
 
 function setDeployedStack({ stack, commit }) {
-  state[stack] = state[stack] || { commit: '', packs: {} };
-  state[stack].commit = commit;
-  _saveState();
+  _ensureStackInDB({ stack });
+  db.set(`stacks.${stack}.commit`, commit).write();
+  log.trace('setDeployedStack', stack, commit);
+}
+
+function getDeployedStack({ stack }) {
+  _ensureStackInDB({ stack });
+  return db.get(`stacks.${stack}`).value();
 }
 
 function setDeployedStackPack({ stack, pack, commit, valuesHash }) {
-  state[stack] = state[stack] || { commit: '', packs: {} };
-  state[stack].packs[pack] = { commit, valuesHash, failures: 0 };
-  _saveState();
+  _ensureStackInDB({ stack });
+  db.set(`stacks.${stack}.packs.${pack}`, { commit, valuesHash, failures: 0 }).write();
+  log.trace('setDeployedStackPack', stack, pack, commit, valuesHash);
+}
+
+function getDeployedStackPack({ stack, pack }) {
+  _ensureStackPackInDB({ stack, pack });
+  return db.get(`stacks.${stack}.packs.${pack}`).value();
 }
 
 function markStackPackForRetry({ stack, pack }) {
-  state[stack] = state[stack] || { commit: '', packs: {} };
-  state[stack].packs[pack] = state[stack].packs[pack] || { commit: '', failures: 0 };
-  state[stack].packs[pack].failures += 1;
-  _saveState();
+  _ensureStackPackInDB({ stack, pack });
+  db.update(`stacks.${stack}.packs.${pack}.failures`, n => n + 1).write();
+  log.trace('markStackPackForRetry', stack, pack);
 }
 
 function needsRetry({ stack, pack }) {
   // TODO - we could put a limit to the retry count here...
-  return ((((state[stack] || {}).packs || {})[pack] || {}).failures || 0) > 0;
+  return db.get(`stacks.${stack}.packs.${pack}.failures`).value() > 0;
 }
 
 module.exports = {

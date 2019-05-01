@@ -1,4 +1,5 @@
 const NodeCache = require('node-cache');
+const log = require('../utils/logger');
 const RegistryClient = require('./client');
 const patterns = require('./patterns');
 const { wait } = require('../utils');
@@ -33,7 +34,7 @@ async function updateTagCache(repo, pattern) {
       };
 
       if (!patterns.isSemanticSort(pattern)) {
-        console.log(`fetching manifest for ${tag}`);
+        log.info(`fetching manifest for ${tag}`);
         await wait(config.docker.minRegistryReqInterval);
         tagEntry.created = await client.getCreated({ ref: tag });
       }
