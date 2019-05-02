@@ -43,6 +43,8 @@ async function checkAndDeployRepo() {
             }. Will not mark as updated and will retry next cycle.`
           );
 
+          log.debug('values: ', await pack.getPreparedValues());
+
           // Mark pack as needing retry
           markStackPackForRetry({ stack: changedStack.stack.name, pack: pack.pack });
         }
