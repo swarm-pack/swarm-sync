@@ -70,7 +70,19 @@ class Pack {
     for (const imageDef of findKeyInObject('image', this.values)) {
       if (imageDef.tag_pattern) {
         await updateTagCache(imageDef.repository, imageDef.tag_pattern);
-        imageDef.tag = getNewestTagFromCache(imageDef.repository, imageDef.tag_pattern);
+        const newestTag = getNewestTagFromCache(
+          imageDef.repository,
+          imageDef.tag_pattern
+        );
+        if (newestTag) {
+          imageDef.tag = newestTag;
+        } else {
+          log.warn(
+            `Didn't find tag matching '${imageDef.tag_pattern}', using default '${
+              imageDef.tag
+            }'`
+          );
+        }
       }
     }
     return this.values;
