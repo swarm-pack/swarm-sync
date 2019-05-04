@@ -4,6 +4,7 @@ const yaml = require('js-yaml');
 const fs = require('fs-extra');
 const deepExtend = require('deep-extend');
 const oHash = require('object-hash');
+const log = require('../utils/logger');
 const { updateTagCache, getNewestTagFromCache } = require('../registry');
 const { findKeyInObject } = require('../utils');
 const config = require('../config');
@@ -15,6 +16,7 @@ class Pack {
     this.packDef = packDef;
     this.values = {};
 
+    log.trace('');
     if (packDef.values_file) {
       this.values = yaml.safeLoad(
         fs.readFileSync(

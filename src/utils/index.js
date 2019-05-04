@@ -15,7 +15,11 @@ function findKeyInObject(key, object) {
   for (const [objectKey, objectValue] of Object.entries(object)) {
     if (objectKey === key) {
       found.push(objectValue);
-    } else if (typeof objectValue === 'object') {
+    } else if (
+      typeof objectValue === 'object' &&
+      objectValue !== null &&
+      !Array.isArray(objectValue)
+    ) {
       found = [...found, ...findKeyInObject(key, objectValue)];
     }
   }
