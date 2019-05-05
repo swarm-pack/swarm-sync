@@ -19,6 +19,12 @@ async function checkAndUpdateImages() {
         service.pattern
       );
 
+      log.trace(
+        `Newest matching tag for '${
+          service.name
+        }' found is '${newestTag}' (current tag '${service.current_image_tag}')`
+      );
+
       if (newestTag && newestTag !== service.current_image_tag) {
         await updateServiceImage(
           service.id,
