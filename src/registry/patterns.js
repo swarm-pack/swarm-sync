@@ -46,14 +46,13 @@ function getFilter(tagPattern) {
   return filters[type] ? filters[type](pattern) : false;
 }
 
-// TODO - some patterns may require different type of sort
-// e.g. semver sort is probably on the tag itself (like compare-versions)
+// Different sorts for different types of pattern
+// For consistent results, we never want to return 0 (i.e. equal)
 function getSort(tagPattern) {
   const { type } = splitTypeAndPattern(tagPattern);
-
   return type === 'semver'
-    ? (a, b) => compareVersions(a.tag, b.tag)
-    : (a, b) => a.created - b.created; // Default (for glob, literal)
+    ? (a, b) => compareVersions(a.tag, b.tag) || (a.tag > b.tag ? 1 : -1)
+    : (a, b) => a.created - b.created || (a.tag > b.tag ? 1 : -1);
 }
 
 module.exports = {
