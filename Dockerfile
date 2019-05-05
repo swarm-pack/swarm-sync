@@ -21,7 +21,7 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     curl https://download.docker.com/linux/debian/gpg | apt-key add - && \
     apt-get update && \
     apt-get install -y \
-      docker-ce-cli ssh libssl-dev make g++ gnupg git \
+      docker-ce-cli ssh libssl-dev make g++ gnupg git && \
     curl -L https://github.com/AGWA/git-crypt/archive/0.6.0.tar.gz | tar zxv -C /var/tmp && \
     cd /var/tmp/git-crypt-0.6.0 && make && make install PREFIX=/usr/local && rm -rf /var/tmp/git-crypt-0.6.0 && \
     mkdir -p /root/.ssh
