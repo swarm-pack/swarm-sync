@@ -1,4 +1,4 @@
-FROM node:11-alpine
+FROM node:12-slim
 # set app port
 ENV PORT 80
 # Location of Swarm sync configuration file
@@ -10,8 +10,6 @@ ENV SSH_PRIVATE_KEY false
 
 # Log level - trace: 0, debug: 1, info: 2, warn: 3, error: 4, silent: 5
 ENV SWARM_SYNC_LOGLEVEL 2
-
-WORKDIR /www
 
 RUN apk --update --no-cache add \
    bash \
