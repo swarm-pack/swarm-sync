@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 
 echo "LOADING SECRETS..."
 source env_secrets_expand.sh
