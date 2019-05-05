@@ -9,6 +9,7 @@ async function checkAndUpdateImages() {
     return;
   }
   log.info(`Found ${managedServices.length} swarm-sync managed services`);
+  log.debug(managedServices.map(s => s.name).join(', '));
 
   for (const service of managedServices) {
     if (service.pattern) {
