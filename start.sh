@@ -1,7 +1,7 @@
 #! /bin/sh
 
 echo "LOADING SECRETS..."
-source ./env_secrets_expand.sh
+source env_secrets_expand.sh
 
 if [ "$SSH_PRIVATE_KEY" != "false" ]
 then
