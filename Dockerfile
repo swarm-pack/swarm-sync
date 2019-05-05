@@ -29,7 +29,7 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
 COPY known_hosts /root/.ssh/known_hosts
 COPY . .
 
-RUN yarn install && \
+RUN npm install --production && \
     chmod +x ./start.sh && \
     chmod +x ./env_secrets_expand.sh
 
