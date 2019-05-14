@@ -78,9 +78,9 @@ class Pack {
           imageDef.tag = newestTag;
         } else {
           log.warn(
-            `Didn't find tag matching '${imageDef.tag_pattern}', using default '${
-              imageDef.tag
-            }'`
+            `Didn't find tag matching '${imageDef.tag_pattern}' for ${
+              imageDef.repository
+            }, using default '${imageDef.tag}'`
           );
         }
       }
