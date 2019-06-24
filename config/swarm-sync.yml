@@ -23,11 +23,10 @@ swarm-sync:
   # Common config with swarm-pack
   docker:
     socketPath: /var/run/docker.sock
+    # used for throttling time between Docker registry requests
+    minRegistryReqInterval: 2000
 
   # swarm-pack repos
   repositories:
     - name: official
       url: https://github.com/swarm-pack/repository
-
-  # used for throttling time between Docker registry requests
-  minRegistryReqInterval: 10000
