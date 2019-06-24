@@ -11,8 +11,6 @@ function getCacheKey(repo) {
   return `tags_${repo}`;
 }
 
-// TODO - We don't currently handle server errors, retries etc. Rate limiting not yet tuned...
-// TODO - This implementation assumes tags are immutable. This assumption needs to be confirmed.
 async function updateTagCache(repo, pattern) {
   // TODO - we might need to sanitize "repo" for cachekey as it probably contains illegal chars
   const cacheKey = getCacheKey(repo);
@@ -33,13 +31,21 @@ async function updateTagCache(repo, pattern) {
         firstSeen: fetchedAt
       };
 
-      if (!patterns.isSemanticSort(pattern)) {
-        log.info(`fetching manifest for ${tag}`);
-        await wait(config.docker.minRegistryReqInterval);
-        tagEntry.created = await client.getCreated({ ref: tag });
-      }
+      // If we fail getting the manifest, skip the tag altogether
+      try {
+        if (!patterns.isSemanticSort(pattern)) {
+          log.info(`fetching manifest for ${tag}`);
 
-      tagCache.push(tagEntry);
+          // TODO add retry
+          await wait(config.docker.minRegistryReqInterval);
+          tagEntry.created = await client.getCreated({ ref: tag });
+        }
+
+        tagCache.push(tagEntry);
+      } catch (error) {
+        console.log('Failed getting tag manifest from server - skipped');
+        console.log(error);
+      }
     }
   }
   cache.set(cacheKey, tagCache);
