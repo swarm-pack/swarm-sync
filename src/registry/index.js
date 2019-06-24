@@ -31,7 +31,8 @@ async function updateTagCache(repo, pattern) {
         firstSeen: fetchedAt
       };
 
-      // If we fail getting the manifest, skip the tag altogether
+      // Registry client frequently giving bad request error on get manifest
+      // Adding try/catch to skip for now
       try {
         if (!patterns.isSemanticSort(pattern)) {
           log.info(`fetching manifest for ${tag}`);
@@ -43,8 +44,8 @@ async function updateTagCache(repo, pattern) {
 
         tagCache.push(tagEntry);
       } catch (error) {
-        console.log('Failed getting tag manifest from server - skipped');
-        console.log(error);
+        log.warn(`Failed getting tag manifest for ${tag} - skipping`);
+        log.trace(error);
       }
     }
   }
