@@ -35,9 +35,6 @@ async function updateTagCache(repo, pattern) {
       // Adding try/catch to skip for now
       try {
         if (!patterns.isSemanticSort(pattern)) {
-          log.info(`fetching manifest for ${tag}`);
-
-          // TODO add retry
           await wait(config.docker.minRegistryReqInterval);
           tagEntry.created = await client.getCreated({ ref: tag });
         }

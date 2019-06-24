@@ -4,6 +4,8 @@ const yaml = require('js-yaml');
 const path = require('path');
 const sh = require('shelljs');
 const log = require('../utils/logger');
+const config = require('../config');
+const { retryAsync } = require('../utils');
 
 const registrySecretsPath = '/run/secrets/registries/';
 
@@ -49,8 +51,18 @@ class RegistryClient {
   }
 
   async getManifest(opts) {
+    return retryAsync(
+      this._getManifest.bind(this),
+      { delay: config.docker.minRegistryReqInterval },
+      opts
+    );
+  }
+
+  async _getManifest(opts) {
+    const that = this;
     return new Promise((resolve, reject) => {
-      this.drc.getManifest(opts, (err, response) =>
+      log.info(`fetching manifest for ${opts.ref}`);
+      that.drc.getManifest(opts, (err, response) =>
         err ? reject(err) : resolve(response)
       );
     });
