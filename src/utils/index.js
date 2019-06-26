@@ -18,7 +18,7 @@ function rejectDelay(delay) {
  * retryAsync(myFunction, { maxTries: 5, delay: 2000 }, arg1, arg2,...)
  */
 async function retryAsync(fn, opts, ...args) {
-  const options = Object.assign({ maxTries: 5, delay: 2000 }, opts);
+  const options = Object.assign({ maxTries: 2, delay: 2000 }, opts);
   let p = Promise.reject();
   for (let i = 0; i < options.maxTries; i += 1) {
     p = p.catch(rejectDelay(options.delay)).catch(() => fn(...args));
