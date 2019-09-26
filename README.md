@@ -84,10 +84,10 @@ Upload this file to a manager node in your Swarm
 docker run -it \
  -v /var/run/docker.sock:/var/run/docker.sock \
  -v /path/to/swarm-sync.yml:/etc/swarm-sync.yml \
- kevbuk/swarm-sync --once
+ kevbuk/swarm-sync --bootstrap
 ```
 
-This uses the "--once" flag for swarm-sync, meaning it will not run as a daemon. That's because in our example config repo we have a swarm-pack configured for swarm-sync, so it will be deployed as a service. Make sure the swarm-sync config is the same inside your Config Repo values.
+This uses the "--bootstrap" flag for swarm-sync, meaning it will not run as a daemon. That's because in our example config repo we have a swarm-pack configured for swarm-sync, so it will be deployed as a service. Make sure the swarm-sync config is the same inside your Config Repo values.
 
 4. Check your desired services are now running on your Swarm
 

@@ -2,4 +2,5 @@
 .drone.yml
 .editorconfig
 .circleci
+.idea
 node_modules
