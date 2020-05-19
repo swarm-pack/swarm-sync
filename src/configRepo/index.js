@@ -8,11 +8,7 @@ const git = require('../utils/git');
 const config = require('../config');
 const Stack = require('./stack');
 
-const tmpDir = tmp.dirSync();
-const repoPath = tmpDir.name;
-const repo = git(repoPath);
-
-async function gitCryptUnlock() {
+async function gitCryptUnlock(repoPath) {
   return new Promise((resolve, reject) => {
     sh.cd(repoPath);
     sh.exec(`git-crypt unlock ${config.git_crypt.keyFile}`, (code, stdout, stderr) => {
@@ -26,6 +22,11 @@ async function gitCryptUnlock() {
 }
 
 async function checkForUpdates() {
+  // Create new temp directory to work with
+  const tmpDir = tmp.dirSync();
+  const repoPath = tmpDir.name;
+  const repo = git(repoPath);
+
   repo.cwd(repoPath);
 
   if (await repo.checkIsRepo()) {
@@ -35,16 +36,16 @@ async function checkForUpdates() {
   }
 
   if (config.git_crypt && config.git_crypt.keyFile) {
-    await gitCryptUnlock();
+    await gitCryptUnlock(repoPath);
   }
 
   const stackDirs = await fs.readdir(path.resolve(repoPath, 'stacks'));
   // Stacks in target are defined in config.stacks, and have a corresponding stacks/[stack-name]/stack.yml in the repo
-  const targetStacks = stackDirs.filter(s => config.stacks.includes(s));
+  const targetStacks = stackDirs.filter((s) => config.stacks.includes(s));
   log.info(`Target stacks: ${targetStacks.join(',')}`);
 
   const stacks = targetStacks.map(
-    stackName =>
+    (stackName) =>
       new Stack({
         name: stackName,
         stackDef: yaml.safeLoad(
@@ -53,7 +54,7 @@ async function checkForUpdates() {
             'utf8'
           )
         ),
-        configRepoPath: repoPath
+        configRepoPath: repoPath,
       })
   );
 
@@ -64,14 +65,16 @@ async function checkForUpdates() {
     if (changedStackPacks.length) {
       changedStacks.push({
         stack,
-        packs: changedStackPacks
+        packs: changedStackPacks,
       });
     }
   }
 
+  // Cleanup temp directory after 
+  tmp.setGracefulCleanup();
   return changedStacks;
 }
 
 module.exports = {
-  checkForUpdates
+  checkForUpdates,
 };
