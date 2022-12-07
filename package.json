@@ -48,7 +48,7 @@
     "request-promise-native": "^1.0.5",
     "semver": "^5.6.0",
     "shelljs": "^0.8.3",
-    "simple-git": "^1.107.0",
+    "simple-git": "^3.15.0",
     "swarm-pack": "https://github.com/swarm-pack/swarm-pack.git",
     "tmp": "^0.0.33",
     "utf8": "^3.0.0",
