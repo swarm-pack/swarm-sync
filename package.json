@@ -22,7 +22,7 @@
     "body-parser": "^1.18.3",
     "commander": "^2.19.0",
     "compare-versions": "^3.4.0",
-    "config": "^3.0.1",
+    "config": "^3.3.8",
     "deep-extend": "^0.6.0",
     "docker-registry-client": "^3.3.0",
     "dockerode": "^2.5.8",
